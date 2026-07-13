@@ -488,6 +488,113 @@ export async function getClientesAdmin(opts: { q?: string; page?: number }): Pro
   }
 }
 
+// ---------------------------------------------------------------------------
+// Cupones
+// ---------------------------------------------------------------------------
+export type CuponRow = {
+  id: string;
+  codigo: string;
+  descripcion: string | null;
+  tipo_descuento: string;
+  valor: number;
+  compra_minima: number;
+  limite_usos: number | null;
+  limite_por_cliente: number | null;
+  usos_actuales: number;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  activo: boolean;
+};
+
+export async function getCuponesAdmin(): Promise<CuponRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("cupones").select("*").order("creado_en", { ascending: false });
+    return (data as CuponRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getCuponById(id: string): Promise<CuponRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("cupones").select("*").eq("id", id).maybeSingle();
+    return (data as CuponRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Usuarios (perfiles administrativos)
+// ---------------------------------------------------------------------------
+export type PerfilRow = {
+  id: string;
+  auth_user_id: string;
+  nombre: string;
+  apellido: string | null;
+  email: string;
+  rol: string;
+  activo: boolean;
+  ultimo_acceso: string | null;
+  creado_en: string;
+};
+
+export async function getPerfilesAdmin(): Promise<PerfilRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("perfiles")
+      .select("id, auth_user_id, nombre, apellido, email, rol, activo, ultimo_acceso, creado_en")
+      .order("creado_en", { ascending: true });
+    return (data as PerfilRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auditoría
+// ---------------------------------------------------------------------------
+export type AuditoriaRow = {
+  id: string;
+  accion: string;
+  entidad: string;
+  entidad_id: string | null;
+  creado_en: string;
+  usuario: string | null;
+};
+
+export const PAGINA_AUDITORIA = 30;
+
+export async function getAuditoriaAdmin(page = 1): Promise<{ rows: AuditoriaRow[]; total: number }> {
+  try {
+    const supabase = await createClient();
+    const desde = (Math.max(1, page) - 1) * PAGINA_AUDITORIA;
+    const { data, count } = await supabase
+      .from("auditoria")
+      .select("id, accion, entidad, entidad_id, creado_en, perfiles(nombre, email)", { count: "exact" })
+      .order("creado_en", { ascending: false })
+      .range(desde, desde + PAGINA_AUDITORIA - 1);
+    const rows = (data ?? []).map((a) => {
+      const perfil = a.perfiles as { nombre: string; email: string } | { nombre: string; email: string }[] | null;
+      const info = Array.isArray(perfil) ? perfil[0] : perfil;
+      return {
+        id: a.id as string,
+        accion: a.accion as string,
+        entidad: a.entidad as string,
+        entidad_id: a.entidad_id as string | null,
+        creado_en: a.creado_en as string,
+        usuario: info ? `${info.nombre} (${info.email})` : null,
+      };
+    });
+    return { rows, total: count ?? 0 };
+  } catch {
+    return { rows: [], total: 0 };
+  }
+}
+
 export async function getClienteAdmin(id: string): Promise<ClienteDetalle | null> {
   try {
     const supabase = await createClient();

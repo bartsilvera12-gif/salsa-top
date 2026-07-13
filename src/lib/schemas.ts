@@ -142,3 +142,32 @@ export const testimonioSchema = z.object({
   orden: z.coerce.number().int().default(0),
 });
 export type TestimonioInput = z.infer<typeof testimonioSchema>;
+
+// ---------------------------------------------------------------------------
+// Cupón
+// ---------------------------------------------------------------------------
+export const cuponSchema = z.object({
+  codigo: z.string().min(1, "El código es obligatorio").max(40),
+  descripcion: z.string().optional().or(z.literal("")),
+  tipo_descuento: z.enum(["porcentaje", "monto_fijo", "envio_gratis"]),
+  valor: z.coerce.number().min(0, "El valor no puede ser negativo").default(0),
+  compra_minima: z.coerce.number().min(0).default(0),
+  limite_usos: numOpc,
+  limite_por_cliente: numOpc,
+  fecha_inicio: z.string().optional().or(z.literal("")),
+  fecha_fin: z.string().optional().or(z.literal("")),
+  activo: z.boolean().default(true),
+});
+export type CuponInput = z.infer<typeof cuponSchema>;
+
+// ---------------------------------------------------------------------------
+// Alta de usuario administrativo
+// ---------------------------------------------------------------------------
+export const usuarioCrearSchema = z.object({
+  nombre: z.string().min(1, "El nombre es obligatorio").max(120),
+  apellido: z.string().optional().or(z.literal("")),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+  rol: z.enum(["super_admin", "administrador", "editor", "operador_pedidos"]),
+});
+export type UsuarioCrearInput = z.infer<typeof usuarioCrearSchema>;
