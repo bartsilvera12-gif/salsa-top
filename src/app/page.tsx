@@ -1,32 +1,43 @@
-import Image from "next/image";
+import { ChiliBackground } from "@/components/public/chili-background";
+import { SiteHeader } from "@/components/public/site-header";
+import { Hero } from "@/components/public/hero";
+import { NosotrosSection } from "@/components/public/nosotros-section";
+import { ProductosSection } from "@/components/public/productos-section";
+import { BeneficiosSection } from "@/components/public/beneficios-section";
+import { ProcesoSection } from "@/components/public/proceso-section";
+import { PropuestaSection } from "@/components/public/propuesta-section";
+import { DistribuidoresSection, ContactoSection } from "@/components/public/contacto-section";
+import { SiteFooter } from "@/components/public/site-footer";
+import { getConfiguracion, getSecciones, getProductos, getBeneficios } from "@/lib/datos";
+import { waLink } from "@/lib/whatsapp";
 
-/**
- * Home temporal (placeholder). La reconstrucción fiel del sitio público
- * (hero, productos, nosotros, etc.) se realiza en la FASE 4.
- */
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const [config, secciones, productos, beneficios] = await Promise.all([
+    getConfiguracion(),
+    getSecciones(),
+    getProductos(),
+    getBeneficios(),
+  ]);
+
+  const wa = waLink(config.whatsapp, "Hola Salsa Top, quiero más información.");
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
-      <div className="borde-fuego-blanco inline-flex items-center rounded-2xl px-6 py-4 shadow-recuadro-fuerte">
-        <Image
-          src="/logo-icono.png"
-          alt="Salsa Top"
-          width={48}
-          height={48}
-          priority
-        />
-      </div>
-      <div>
-        <p className="eyebrow">Artesanal · Gourmet · Paraguay</p>
-        <h1 className="mt-3 font-title text-5xl font-extrabold uppercase leading-none text-tinta">
-          No es solo una salsa.{" "}
-          <span className="texto-fuego">Es una experiencia gourmet.</span>
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-tinta-suave">
-          Migración en curso a Next.js + Supabase. El sitio público se
-          reconstruye en la FASE 4 conservando el diseño actual.
-        </p>
-      </div>
-    </main>
+    <>
+      <ChiliBackground />
+      <SiteHeader whatsappUrl={wa} />
+      <main>
+        <Hero hero={secciones.hero} />
+        <NosotrosSection historia={secciones.historia} />
+        <ProductosSection productos={productos} />
+        <BeneficiosSection beneficios={beneficios} />
+        <ProcesoSection proceso={secciones.proceso} />
+        <PropuestaSection propuesta={secciones.propuesta} />
+        <DistribuidoresSection config={config} />
+        <ContactoSection config={config} contacto={secciones.contacto} />
+      </main>
+      <SiteFooter config={config} />
+    </>
   );
 }
