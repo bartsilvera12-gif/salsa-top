@@ -527,6 +527,115 @@ export async function getCuponById(id: string): Promise<CuponRow | null> {
 }
 
 // ---------------------------------------------------------------------------
+// Banners
+// ---------------------------------------------------------------------------
+export type BannerRow = {
+  id: string;
+  titulo: string | null;
+  subtitulo: string | null;
+  descripcion: string | null;
+  imagen_desktop_url: string | null;
+  imagen_mobile_url: string | null;
+  texto_boton: string | null;
+  enlace_boton: string | null;
+  color_texto: string | null;
+  color_fondo: string | null;
+  overlay: number;
+  orden: number;
+  activo: boolean;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+};
+
+export async function getBannersAdmin(): Promise<BannerRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("banners").select("*").order("orden");
+    return (data as BannerRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getBannerById(id: string): Promise<BannerRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("banners").select("*").eq("id", id).maybeSingle();
+    return (data as BannerRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Recetas
+// ---------------------------------------------------------------------------
+export type RecetaRow = {
+  id: string;
+  titulo: string;
+  slug: string;
+  descripcion_corta: string | null;
+  contenido: string | null;
+  ingredientes: string | null;
+  instrucciones: string | null;
+  imagen_principal_url: string | null;
+  tiempo_preparacion_minutos: number | null;
+  porciones: number | null;
+  dificultad: string | null;
+  activa: boolean;
+  destacada: boolean;
+  meta_titulo: string | null;
+  meta_descripcion: string | null;
+};
+
+export async function getRecetasAdmin(): Promise<RecetaRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("recetas").select("*").order("creada_en", { ascending: false });
+    return (data as RecetaRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getRecetaById(id: string): Promise<RecetaRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("recetas").select("*").eq("id", id).maybeSingle();
+    return (data as RecetaRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Multimedia (archivos)
+// ---------------------------------------------------------------------------
+export type ArchivoRow = {
+  id: string;
+  nombre: string;
+  url: string;
+  ruta_storage: string;
+  mime_type: string | null;
+  tamano_bytes: number | null;
+  creado_en: string;
+};
+
+export async function getArchivosAdmin(): Promise<ArchivoRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("archivos")
+      .select("id, nombre, url, ruta_storage, mime_type, tamano_bytes, creado_en")
+      .order("creado_en", { ascending: false })
+      .limit(200);
+    return (data as ArchivoRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Usuarios (perfiles administrativos)
 // ---------------------------------------------------------------------------
 export type PerfilRow = {

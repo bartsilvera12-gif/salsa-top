@@ -171,3 +171,45 @@ export const usuarioCrearSchema = z.object({
   rol: z.enum(["super_admin", "administrador", "editor", "operador_pedidos"]),
 });
 export type UsuarioCrearInput = z.infer<typeof usuarioCrearSchema>;
+
+// ---------------------------------------------------------------------------
+// Banner
+// ---------------------------------------------------------------------------
+export const bannerSchema = z.object({
+  titulo: z.string().optional().or(z.literal("")),
+  subtitulo: z.string().optional().or(z.literal("")),
+  descripcion: z.string().optional().or(z.literal("")),
+  imagen_desktop_url: z.string().optional().or(z.literal("")),
+  imagen_mobile_url: z.string().optional().or(z.literal("")),
+  texto_boton: z.string().optional().or(z.literal("")),
+  enlace_boton: z.string().optional().or(z.literal("")),
+  color_texto: z.string().max(20).optional().or(z.literal("")),
+  color_fondo: z.string().max(20).optional().or(z.literal("")),
+  overlay: z.coerce.number().min(0).max(1).default(0),
+  orden: z.coerce.number().int().default(0),
+  activo: z.boolean().default(true),
+  fecha_inicio: z.string().optional().or(z.literal("")),
+  fecha_fin: z.string().optional().or(z.literal("")),
+});
+export type BannerInput = z.infer<typeof bannerSchema>;
+
+// ---------------------------------------------------------------------------
+// Receta
+// ---------------------------------------------------------------------------
+export const recetaSchema = z.object({
+  titulo: z.string().min(1, "El título es obligatorio").max(200),
+  slug: z.string().min(1, "El slug es obligatorio").regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
+  descripcion_corta: z.string().optional().or(z.literal("")),
+  contenido: z.string().optional().or(z.literal("")),
+  ingredientes: z.string().optional().or(z.literal("")),
+  instrucciones: z.string().optional().or(z.literal("")),
+  imagen_principal_url: z.string().optional().or(z.literal("")),
+  tiempo_preparacion_minutos: numOpc,
+  porciones: numOpc,
+  dificultad: z.string().max(40).optional().or(z.literal("")),
+  activa: z.boolean().default(true),
+  destacada: z.boolean().default(false),
+  meta_titulo: z.string().max(200).optional().or(z.literal("")),
+  meta_descripcion: z.string().max(300).optional().or(z.literal("")),
+});
+export type RecetaInput = z.infer<typeof recetaSchema>;
