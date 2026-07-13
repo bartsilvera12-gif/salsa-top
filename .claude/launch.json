@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "salsa-top",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\Users\\duart\\AppData\\Local\\Temp\\claude\\C--NEURA-Alta-Magia-Daniel-extract\\a5775c74-4b27-41c5-b4c8-9e5293aedc33\\scratchpad\\serve.ps1"
+      ],
+      "port": 8791
+    }
+  ]
+}

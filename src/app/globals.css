@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --crema: #fff4ea;
+  --crema-suave: #fbefe2;
+  --tinta: #241a14;
+  --tinta-suave: #2e2620;
+  --acento: #c2410c;
+  --fuego-rojo: #ef3340;
+  --fuego-naranja: #ff8200;
+  --fuego-amarillo: #ffd100;
+  --petroleo: #1e5155;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-crema font-body text-tinta-suave antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @apply font-title;
+  }
+}
+
+@layer components {
+  /* Eyebrow / etiqueta superior de sección */
+  .eyebrow {
+    @apply font-title font-bold uppercase tracking-[0.28em] text-[14px] text-acento;
+  }
+
+  /* Recuadro base (tarjetas de contenido) */
+  .recuadro {
+    @apply rounded-3xl border border-black/10 bg-crema shadow-recuadro;
+  }
+
+  /* Borde con degradado de fuego (fondo crema) — técnica padding-box/border-box */
+  .borde-fuego {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(#fff4ea, #fff4ea) padding-box,
+      linear-gradient(120deg, #ffd100, #ff8200 55%, #ef3340) border-box;
+  }
+  /* Borde de fuego con relleno blanco */
+  .borde-fuego-blanco {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(#ffffff, #ffffff) padding-box,
+      linear-gradient(120deg, #ffd100, #ff8200 55%, #ef3340) border-box;
+  }
+
+  /* Botón principal (gradiente de fuego) */
+  .btn-fuego {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-title font-extrabold uppercase tracking-wide;
+    @apply bg-fuego-gradient px-7 py-3 text-[#1a0e00] transition-transform;
+  }
+  .btn-fuego:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Botón secundario (contorno) */
+  .btn-contorno {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-title font-extrabold uppercase tracking-wide;
+    @apply border-[1.5px] border-black/30 px-7 py-3 text-tinta transition-colors;
+  }
+  .btn-contorno:hover {
+    @apply bg-white;
+  }
+}
+
+/* Utilidad de texto con gradiente de fuego */
+.texto-fuego {
+  background: linear-gradient(90deg, #ff8200, #ef3340);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
