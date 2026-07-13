@@ -72,14 +72,50 @@ npm run typecheck  # TypeScript sin emitir
 > El acceso al panel exige: sesión válida **+** perfil en `saltatop.perfiles`
 > **+** perfil activo **+** rol autorizado. No basta con estar registrado en Auth.
 
-## Despliegue en Coolify
+## Exponer el schema `saltatop` en PostgREST (self-hosted)
 
-1. Crear un recurso **Application** desde este repositorio (rama `main`).
-2. Build pack: **Nixpacks** (Node). Build: `npm run build` · Start: `npm run start`.
-3. Cargar las variables de entorno (las de `.env.example`).
-   `SUPABASE_SERVICE_ROLE_KEY` solo como variable de servidor.
-4. Puerto: `3000`. Node ≥ 20.
-5. Desplegar. Verificar `/` (público) y `/admin/login`.
+Requisito para que la API vea `saltatop`. El schema ya se agregó a la config del
+rol `authenticator`; PostgREST debe **recargar** para tomarlo. En Supabase
+self-hosted, el `NOTIFY pgrst, 'reload config'` puede no llegar si PostgREST se
+conecta vía pooler, así que la vía segura es **reiniciar el servicio `rest`**:
+
+```bash
+# Ubicar el contenedor de PostgREST
+docker ps --format '{{.Names}}' | grep -i rest
+# Reiniciarlo (nombre típico: supabase-rest o <stack>-rest-1)
+docker restart <nombre-del-contenedor-rest>
+```
+
+Si PostgREST toma los schemas desde variable de entorno (`PGRST_DB_SCHEMAS`) en
+vez de la config del rol, agregar `saltatop` a esa lista y reiniciar.
+
+Verificar (debe dar HTTP 200):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  "https://<tu-api>/rest/v1/categorias?select=nombre&limit=1" \
+  -H "apikey: <ANON_KEY>" -H "Accept-Profile: saltatop"
+```
+
+## Despliegue en Vercel (recomendado para Next.js)
+
+1. En [vercel.com](https://vercel.com) → **Add New → Project** → importar el repo
+   `bartsilvera12-gif/salsa-top` (rama `main`). Framework: **Next.js** (autodetectado).
+2. En **Environment Variables**, cargar las 5 de `.env.example`:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `SUPABASE_SERVICE_ROLE_KEY` (secreta), `NEXT_PUBLIC_SITE_URL`,
+   `NEXT_PUBLIC_WHATSAPP_NUMBER`.
+3. **Deploy**. Verificar `/` (público) y `/admin/login`.
+4. (Opcional) Configurar el dominio propio en Vercel → Settings → Domains.
+
+> El sitio estático original sigue intacto en GitHub Pages y en la rama
+> `static-legacy` hasta hacer el corte final.
+
+### Alternativa: self-host (Docker / VPS)
+
+`next.config.mjs` ya usa `output: "standalone"`. Build con `npm run build` y
+correr `node .next/standalone/server.js` (o `npm run start`) en el puerto `3000`
+con las mismas variables de entorno.
 
 ## Estructura
 
