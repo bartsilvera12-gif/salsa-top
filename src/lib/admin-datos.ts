@@ -122,3 +122,114 @@ export async function getEtiquetasOpciones(): Promise<Opcion[]> {
     return [];
   }
 }
+
+// ---------------------------------------------------------------------------
+// Categorías
+// ---------------------------------------------------------------------------
+export type CategoriaRow = {
+  id: string;
+  nombre: string;
+  slug: string;
+  descripcion: string | null;
+  imagen_url: string | null;
+  icono: string | null;
+  color: string | null;
+  orden: number;
+  activa: boolean;
+};
+
+export type CategoriaLista = Pick<CategoriaRow, "id" | "nombre" | "slug" | "color" | "orden" | "activa"> & {
+  productos: number;
+};
+
+export async function getCategoriasAdmin(): Promise<CategoriaLista[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("categorias")
+      .select("id, nombre, slug, color, orden, activa, productos(count)")
+      .order("orden", { ascending: true });
+    return (data ?? []).map((c) => {
+      const rel = c.productos as { count: number }[] | null;
+      return {
+        id: c.id as string,
+        nombre: c.nombre as string,
+        slug: c.slug as string,
+        color: c.color as string | null,
+        orden: c.orden as number,
+        activa: c.activa as boolean,
+        productos: rel?.[0]?.count ?? 0,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function getCategoriaById(id: string): Promise<CategoriaRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("categorias").select("*").eq("id", id).maybeSingle();
+    return (data as CategoriaRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function contarProductosDeCategoria(id: string): Promise<number> {
+  try {
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from("productos")
+      .select("*", { count: "exact", head: true })
+      .eq("categoria_id", id);
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Configuración del sitio
+// ---------------------------------------------------------------------------
+export type ConfiguracionRow = {
+  id: string;
+  nombre_marca: string;
+  eslogan: string | null;
+  descripcion_corta: string | null;
+  descripcion_larga: string | null;
+  logo_url: string | null;
+  favicon_url: string | null;
+  whatsapp: string | null;
+  telefono: string | null;
+  email: string | null;
+  direccion: string | null;
+  horario_atencion: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  tiktok_url: string | null;
+  moneda: string | null;
+  simbolo_moneda: string | null;
+  pais: string | null;
+  compra_minima: number | null;
+  costo_envio: number | null;
+  envio_gratis_desde: number | null;
+  retiro_local_habilitado: boolean;
+  pedidos_habilitados: boolean;
+  mensaje_confirmacion: string | null;
+};
+
+export async function getConfiguracionAdmin(): Promise<ConfiguracionRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("configuracion_sitio")
+      .select("*")
+      .order("creado_en", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    return (data as ConfiguracionRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}

@@ -39,3 +39,57 @@ export const productoSchema = z.object({
 });
 
 export type ProductoInput = z.infer<typeof productoSchema>;
+
+// ---------------------------------------------------------------------------
+// Categoría
+// ---------------------------------------------------------------------------
+export const categoriaSchema = z.object({
+  nombre: z.string().min(1, "El nombre es obligatorio").max(120),
+  slug: z
+    .string()
+    .min(1, "El slug es obligatorio")
+    .regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones"),
+  descripcion: z.string().optional().or(z.literal("")),
+  imagen_url: z.string().optional().or(z.literal("")),
+  icono: z.string().max(60).optional().or(z.literal("")),
+  color: z.string().max(20).optional().or(z.literal("")),
+  orden: z.coerce.number().int().default(0),
+  activa: z.boolean().default(true),
+});
+export type CategoriaInput = z.infer<typeof categoriaSchema>;
+
+// ---------------------------------------------------------------------------
+// Configuración del sitio
+// ---------------------------------------------------------------------------
+const numOpc = z
+  .union([z.number(), z.string()])
+  .transform((v) => (v === "" || v === null || v === undefined ? null : Number(v)))
+  .refine((v) => v === null || (!isNaN(v) && v >= 0), "Debe ser un número ≥ 0")
+  .nullable();
+
+export const configuracionSchema = z.object({
+  nombre_marca: z.string().min(1, "El nombre de marca es obligatorio").max(120),
+  eslogan: z.string().optional().or(z.literal("")),
+  descripcion_corta: z.string().optional().or(z.literal("")),
+  descripcion_larga: z.string().optional().or(z.literal("")),
+  logo_url: z.string().optional().or(z.literal("")),
+  favicon_url: z.string().optional().or(z.literal("")),
+  whatsapp: z.string().optional().or(z.literal("")),
+  telefono: z.string().optional().or(z.literal("")),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  direccion: z.string().optional().or(z.literal("")),
+  horario_atencion: z.string().optional().or(z.literal("")),
+  instagram_url: z.string().optional().or(z.literal("")),
+  facebook_url: z.string().optional().or(z.literal("")),
+  tiktok_url: z.string().optional().or(z.literal("")),
+  moneda: z.string().max(10).optional().or(z.literal("")),
+  simbolo_moneda: z.string().max(10).optional().or(z.literal("")),
+  pais: z.string().max(60).optional().or(z.literal("")),
+  compra_minima: numOpc,
+  costo_envio: numOpc,
+  envio_gratis_desde: numOpc,
+  retiro_local_habilitado: z.boolean().default(true),
+  pedidos_habilitados: z.boolean().default(true),
+  mensaje_confirmacion: z.string().optional().or(z.literal("")),
+});
+export type ConfiguracionInput = z.infer<typeof configuracionSchema>;
