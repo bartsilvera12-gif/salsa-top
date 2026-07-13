@@ -233,3 +233,109 @@ export async function getConfiguracionAdmin(): Promise<ConfiguracionRow | null> 
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Secciones del sitio (contenido)
+// ---------------------------------------------------------------------------
+export type SeccionRow = {
+  id: string;
+  clave: string;
+  titulo: string | null;
+  subtitulo: string | null;
+  contenido: string | null;
+  imagen_url: string | null;
+  imagen_mobile_url: string | null;
+  video_url: string | null;
+  texto_boton: string | null;
+  enlace_boton: string | null;
+  orden: number;
+  activa: boolean;
+};
+
+export async function getSeccionesAdmin(): Promise<SeccionRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("secciones_sitio").select("*").order("orden");
+    return (data as SeccionRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getSeccionById(id: string): Promise<SeccionRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("secciones_sitio").select("*").eq("id", id).maybeSingle();
+    return (data as SeccionRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Beneficios
+// ---------------------------------------------------------------------------
+export type BeneficioRow = {
+  id: string;
+  titulo: string;
+  descripcion: string | null;
+  icono: string | null;
+  imagen_url: string | null;
+  orden: number;
+  activo: boolean;
+};
+
+export async function getBeneficiosAdmin(): Promise<BeneficioRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("beneficios").select("*").order("orden");
+    return (data as BeneficioRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getBeneficioById(id: string): Promise<BeneficioRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("beneficios").select("*").eq("id", id).maybeSingle();
+    return (data as BeneficioRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Testimonios
+// ---------------------------------------------------------------------------
+export type TestimonioRow = {
+  id: string;
+  nombre_cliente: string;
+  cargo_o_descripcion: string | null;
+  comentario: string;
+  calificacion: number;
+  imagen_url: string | null;
+  destacado: boolean;
+  aprobado: boolean;
+  orden: number;
+};
+
+export async function getTestimoniosAdmin(): Promise<TestimonioRow[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("testimonios").select("*").order("orden");
+    return (data as TestimonioRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getTestimonioById(id: string): Promise<TestimonioRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("testimonios").select("*").eq("id", id).maybeSingle();
+    return (data as TestimonioRow | null) ?? null;
+  } catch {
+    return null;
+  }
+}

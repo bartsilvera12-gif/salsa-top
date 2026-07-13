@@ -93,3 +93,52 @@ export const configuracionSchema = z.object({
   mensaje_confirmacion: z.string().optional().or(z.literal("")),
 });
 export type ConfiguracionInput = z.infer<typeof configuracionSchema>;
+
+// ---------------------------------------------------------------------------
+// Sección de contenido
+// ---------------------------------------------------------------------------
+export const seccionSchema = z.object({
+  clave: z
+    .string()
+    .min(1, "La clave es obligatoria")
+    .regex(/^[a-z0-9_-]+$/, "Solo minúsculas, números, guiones y guion bajo"),
+  titulo: z.string().optional().or(z.literal("")),
+  subtitulo: z.string().optional().or(z.literal("")),
+  contenido: z.string().optional().or(z.literal("")),
+  imagen_url: z.string().optional().or(z.literal("")),
+  imagen_mobile_url: z.string().optional().or(z.literal("")),
+  video_url: z.string().optional().or(z.literal("")),
+  texto_boton: z.string().optional().or(z.literal("")),
+  enlace_boton: z.string().optional().or(z.literal("")),
+  orden: z.coerce.number().int().default(0),
+  activa: z.boolean().default(true),
+});
+export type SeccionInput = z.infer<typeof seccionSchema>;
+
+// ---------------------------------------------------------------------------
+// Beneficio
+// ---------------------------------------------------------------------------
+export const beneficioSchema = z.object({
+  titulo: z.string().min(1, "El título es obligatorio").max(160),
+  descripcion: z.string().optional().or(z.literal("")),
+  icono: z.string().max(60).optional().or(z.literal("")),
+  imagen_url: z.string().optional().or(z.literal("")),
+  orden: z.coerce.number().int().default(0),
+  activo: z.boolean().default(true),
+});
+export type BeneficioInput = z.infer<typeof beneficioSchema>;
+
+// ---------------------------------------------------------------------------
+// Testimonio
+// ---------------------------------------------------------------------------
+export const testimonioSchema = z.object({
+  nombre_cliente: z.string().min(1, "El nombre es obligatorio").max(160),
+  cargo_o_descripcion: z.string().optional().or(z.literal("")),
+  comentario: z.string().min(1, "El comentario es obligatorio"),
+  calificacion: z.coerce.number().int().min(1).max(5).default(5),
+  imagen_url: z.string().optional().or(z.literal("")),
+  destacado: z.boolean().default(false),
+  aprobado: z.boolean().default(false),
+  orden: z.coerce.number().int().default(0),
+});
+export type TestimonioInput = z.infer<typeof testimonioSchema>;
