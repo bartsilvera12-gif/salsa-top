@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuestros Trabajos · Salsa Top</title>
+<link rel="icon" type="image/png" href="../logo-icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Barlow',system-ui,sans-serif;color:#2E2620;background:#FFF4EA;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .bgfondo{position:fixed;inset:0;z-index:-1;background:#FFF4EA url('../fondo-beneficios.jpg') top center;background-size:100% auto;background-repeat:repeat-y;pointer-events:none}
+  header{position:sticky;top:0;z-index:10;background:rgba(255,244,234,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(60,45,35,.1)}
+  .bar{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{display:inline-flex;align-items:center;gap:10px}
+  .brand img{height:34px;display:block}
+  .brand span{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;letter-spacing:.02em;text-transform:uppercase;color:#241A14}
+  .back{display:inline-flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:15px;color:#241A14;border:1.5px solid rgba(60,45,35,.3);padding:9px 20px;border-radius:999px;text-decoration:none}
+  .back:hover{background:#fff}
+  .wrap{max-width:1180px;margin:0 auto;padding:52px 24px 90px}
+  .head{text-align:center;margin-bottom:44px}
+  .eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.28em;text-transform:uppercase;font-size:14px;color:#C2410C}
+  h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(34px,6vw,58px);line-height:1.02;color:#241A14;margin:8px 0 10px}
+  .sub{color:#453B32;font-size:18px;max-width:60ch;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+  .card{position:relative;display:block;aspect-ratio:3/2;overflow:hidden;border-radius:18px;border:1px solid rgba(60,45,35,.14);box-shadow:0 16px 40px rgba(0,0,0,.16);background:#F0E4D2;text-decoration:none}
+  .card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+  .card:hover img{transform:scale(1.06)}
+  .card .cap{position:absolute;left:0;right:0;bottom:0;padding:34px 16px 14px;background:linear-gradient(transparent,rgba(8,12,12,.82));font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:17px;color:#F5EFE3}
+  footer{max-width:1180px;margin:0 auto;padding:30px 24px 10px;text-align:center;color:#524638;font-size:13.5px}
+  footer a{color:#C2410C;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="bgfondo" aria-hidden="true"></div>
+  <header>
+    <div class="bar">
+      <a class="brand" href="../"><img src="../logo-icono.png" alt="Salsa Top"><span>Salsa Top</span></a>
+      <a class="back" href="../">← Volver al sitio</a>
+    </div>
+  </header>
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">Resultados reales</div>
+      <h1>Nuestros Trabajos</h1>
+      <p class="sub">Así elaboramos cada producto: proceso artesanal, máquinas propias y control de calidad en nuestra planta. Tocá una foto para verla en grande.</p>
+    </div>
+    <div class="grid">
+      <a class="card" href="../trabajo-ingredientes.jpg" target="_blank" rel="noopener"><img src="../trabajo-ingredientes.jpg" alt="Selección de ingredientes" loading="lazy"><span class="cap">Selección de ingredientes</span></a>
+      <a class="card" href="../trabajo-corte.jpg" target="_blank" rel="noopener"><img src="../trabajo-corte.jpg" alt="Preparación artesanal" loading="lazy"><span class="cap">Preparación artesanal</span></a>
+      <a class="card" href="../trabajo-elaboracion.jpg" target="_blank" rel="noopener"><img src="../trabajo-elaboracion.jpg" alt="Elaboración artesanal" loading="lazy"><span class="cap">Elaboración artesanal</span></a>
+      <a class="card" href="../trabajo-maquinas.jpg" target="_blank" rel="noopener"><img src="../trabajo-maquinas.jpg" alt="Nuestras máquinas" loading="lazy"><span class="cap">Nuestras máquinas</span></a>
+      <a class="card" href="../trabajo-produccion.jpg" target="_blank" rel="noopener"><img src="../trabajo-produccion.jpg" alt="Sala de producción" loading="lazy"><span class="cap">Sala de producción</span></a>
+      <a class="card" href="../trabajo-empaquetado.jpg" target="_blank" rel="noopener"><img src="../trabajo-empaquetado.jpg" alt="Empaquetado y sellado" loading="lazy"><span class="cap">Empaquetado y sellado</span></a>
+      <a class="card" href="../trabajo-terminado.jpg" target="_blank" rel="noopener"><img src="../trabajo-terminado.jpg" alt="Producto terminado" loading="lazy"><span class="cap">Producto terminado</span></a>
+      <a class="card" href="../trabajo-sachets.jpg" target="_blank" rel="noopener"><img src="../trabajo-sachets.jpg" alt="Envasado en sachets" loading="lazy"><span class="cap">Envasado en sachets</span></a>
+      <a class="card" href="../trabajo-deposito.jpg" target="_blank" rel="noopener"><img src="../trabajo-deposito.jpg" alt="Listo para distribuir" loading="lazy"><span class="cap">Listo para distribuir</span></a>
+      <a class="card" href="../trabajo-envasadora.jpg" target="_blank" rel="noopener"><img src="../trabajo-envasadora.jpg" alt="Envasadora automática" loading="lazy"><span class="cap">Envasadora automática</span></a>
+      <a class="card" href="../trabajo-linea.jpg" target="_blank" rel="noopener"><img src="../trabajo-linea.jpg" alt="Línea de envasado" loading="lazy"><span class="cap">Línea de envasado</span></a>
+      <a class="card" href="../trabajo-displays.jpg" target="_blank" rel="noopener"><img src="../trabajo-displays.jpg" alt="Armado de displays" loading="lazy"><span class="cap">Armado de displays</span></a>
+    </div>
+    <div style="text-align:center;margin-top:44px">
+      <a class="back" href="../">← Volver al sitio</a>
+    </div>
+    <footer>© 2026 Salsa Top · Paraguay · Desarrollado por <a href="https://neura.com.py" target="_blank" rel="noopener">NEURA</a></footer>
+  </div>
+</body>
+</html>
