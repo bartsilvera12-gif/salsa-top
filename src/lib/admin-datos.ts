@@ -339,3 +339,169 @@ export async function getTestimonioById(id: string): Promise<TestimonioRow | nul
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Pedidos
+// ---------------------------------------------------------------------------
+export type PedidoLista = {
+  id: string;
+  numero: string;
+  nombre_cliente: string;
+  telefono_cliente: string;
+  estado: string;
+  estado_pago: string;
+  total: number;
+  metodo_entrega: string | null;
+  creado_en: string;
+};
+
+export type PedidoItem = {
+  nombre_producto: string;
+  descripcion_variante: string | null;
+  cantidad: number;
+  precio_unitario: number;
+  subtotal: number;
+};
+
+export type PedidoHistorial = {
+  estado_anterior: string | null;
+  estado_nuevo: string;
+  comentario: string | null;
+  creado_en: string;
+};
+
+export type PedidoDetalle = {
+  id: string;
+  numero: string;
+  nombre_cliente: string;
+  telefono_cliente: string;
+  email_cliente: string | null;
+  ciudad: string | null;
+  barrio: string | null;
+  direccion_entrega: string | null;
+  referencia_entrega: string | null;
+  estado: string;
+  estado_pago: string;
+  metodo_pago: string | null;
+  metodo_entrega: string | null;
+  subtotal: number;
+  descuento: number;
+  costo_envio: number;
+  total: number;
+  observaciones_cliente: string | null;
+  observaciones_internas: string | null;
+  creado_en: string;
+  items: PedidoItem[];
+  historial: PedidoHistorial[];
+};
+
+export const PAGINA_PEDIDOS = 15;
+
+export async function getPedidosAdmin(opts: {
+  q?: string;
+  estado?: string;
+  estadoPago?: string;
+  page?: number;
+}): Promise<{ rows: PedidoLista[]; total: number }> {
+  try {
+    const supabase = await createClient();
+    const page = Math.max(1, opts.page ?? 1);
+    const desde = (page - 1) * PAGINA_PEDIDOS;
+
+    let query = supabase
+      .from("pedidos")
+      .select("id, numero, nombre_cliente, telefono_cliente, estado, estado_pago, total, metodo_entrega, creado_en", { count: "exact" })
+      .order("creado_en", { ascending: false })
+      .range(desde, desde + PAGINA_PEDIDOS - 1);
+
+    if (opts.q) query = query.or(`numero.ilike.%${opts.q}%,nombre_cliente.ilike.%${opts.q}%,telefono_cliente.ilike.%${opts.q}%`);
+    if (opts.estado && opts.estado !== "todos") query = query.eq("estado", opts.estado);
+    if (opts.estadoPago && opts.estadoPago !== "todos") query = query.eq("estado_pago", opts.estadoPago);
+
+    const { data, count } = await query;
+    return { rows: (data as PedidoLista[]) ?? [], total: count ?? 0 };
+  } catch {
+    return { rows: [], total: 0 };
+  }
+}
+
+export async function getPedidoAdmin(id: string): Promise<PedidoDetalle | null> {
+  try {
+    const supabase = await createClient();
+    const { data: pedido } = await supabase.from("pedidos").select("*").eq("id", id).maybeSingle();
+    if (!pedido) return null;
+    const [{ data: items }, { data: historial }] = await Promise.all([
+      supabase.from("pedido_items").select("nombre_producto, descripcion_variante, cantidad, precio_unitario, subtotal").eq("pedido_id", id),
+      supabase.from("pedido_historial").select("estado_anterior, estado_nuevo, comentario, creado_en").eq("pedido_id", id).order("creado_en", { ascending: false }),
+    ]);
+    return {
+      ...(pedido as Omit<PedidoDetalle, "items" | "historial">),
+      items: (items as PedidoItem[]) ?? [],
+      historial: (historial as PedidoHistorial[]) ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Clientes
+// ---------------------------------------------------------------------------
+export type ClienteLista = {
+  id: string;
+  nombre: string;
+  apellido: string | null;
+  telefono: string;
+  email: string | null;
+  ciudad: string | null;
+  activo: boolean;
+};
+
+export type ClienteDetalle = ClienteLista & {
+  barrio: string | null;
+  direccion: string | null;
+  referencia: string | null;
+  documento: string | null;
+  notas: string | null;
+  creado_en: string;
+  pedidos: { id: string; numero: string; estado: string; total: number; creado_en: string }[];
+  totalComprado: number;
+};
+
+export const PAGINA_CLIENTES = 15;
+
+export async function getClientesAdmin(opts: { q?: string; page?: number }): Promise<{ rows: ClienteLista[]; total: number }> {
+  try {
+    const supabase = await createClient();
+    const page = Math.max(1, opts.page ?? 1);
+    const desde = (page - 1) * PAGINA_CLIENTES;
+    let query = supabase
+      .from("clientes")
+      .select("id, nombre, apellido, telefono, email, ciudad, activo", { count: "exact" })
+      .order("creado_en", { ascending: false })
+      .range(desde, desde + PAGINA_CLIENTES - 1);
+    if (opts.q) query = query.or(`nombre.ilike.%${opts.q}%,telefono.ilike.%${opts.q}%,email.ilike.%${opts.q}%`);
+    const { data, count } = await query;
+    return { rows: (data as ClienteLista[]) ?? [], total: count ?? 0 };
+  } catch {
+    return { rows: [], total: 0 };
+  }
+}
+
+export async function getClienteAdmin(id: string): Promise<ClienteDetalle | null> {
+  try {
+    const supabase = await createClient();
+    const { data: cliente } = await supabase.from("clientes").select("*").eq("id", id).maybeSingle();
+    if (!cliente) return null;
+    const { data: pedidos } = await supabase
+      .from("pedidos")
+      .select("id, numero, estado, total, creado_en")
+      .eq("cliente_id", id)
+      .order("creado_en", { ascending: false });
+    const lista = (pedidos as { id: string; numero: string; estado: string; total: number; creado_en: string }[]) ?? [];
+    const totalComprado = lista.filter((p) => p.estado !== "cancelado").reduce((s, p) => s + (p.total ?? 0), 0);
+    return { ...(cliente as ClienteLista & Record<string, unknown>), pedidos: lista, totalComprado } as ClienteDetalle;
+  } catch {
+    return null;
+  }
+}
