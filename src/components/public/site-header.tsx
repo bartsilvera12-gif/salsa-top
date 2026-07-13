@@ -2,8 +2,24 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCarrito } from "@/lib/carrito";
+
+function CarritoLink() {
+  const { cantidadTotal } = useCarrito();
+  return (
+    <Link href="/carrito" className="relative grid h-10 w-10 place-items-center rounded-xl text-tinta hover:bg-white/60" aria-label="Carrito">
+      <ShoppingCart size={20} />
+      {cantidadTotal > 0 && (
+        <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-fuego-rojo px-1 text-[11px] font-bold text-white">
+          {cantidadTotal}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 const LINKS = [
   { label: "Nosotros", href: "#nosotros" },
@@ -34,21 +50,27 @@ export function SiteHeader({ whatsappUrl }: { whatsappUrl: string }) {
               {l.label}
             </a>
           ))}
+          <CarritoLink />
           <a href={whatsappUrl} target="_blank" rel="noopener" className="btn-fuego px-5 py-2.5 text-[15px]">
             WhatsApp
           </a>
         </nav>
 
-        {/* Botón móvil */}
-        <button
-          type="button"
-          onClick={() => setAbierto((v) => !v)}
-          className="borde-fuego grid h-11 w-11 place-items-center rounded-xl text-tinta shadow-recuadro-fuerte lg:hidden"
-          aria-label={abierto ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={abierto}
-        >
-          {abierto ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {/* Carrito + botón móvil */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <div className="borde-fuego rounded-xl px-1 shadow-recuadro-fuerte">
+            <CarritoLink />
+          </div>
+          <button
+            type="button"
+            onClick={() => setAbierto((v) => !v)}
+            className="borde-fuego grid h-11 w-11 place-items-center rounded-xl text-tinta shadow-recuadro-fuerte"
+            aria-label={abierto ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={abierto}
+          >
+            {abierto ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* Menú móvil desplegable */}

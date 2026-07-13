@@ -172,6 +172,40 @@ export async function getProductos(): Promise<Producto[]> {
   }
 }
 
+export type MetodoPago = { nombre: string; descripcion: string | null; instrucciones: string | null };
+export type MetodoEntrega = { nombre: string; descripcion: string | null; costo: number };
+
+export async function getMetodosPago(): Promise<MetodoPago[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("metodos_pago")
+      .select("nombre, descripcion, instrucciones")
+      .eq("activo", true)
+      .order("orden");
+    if (!data || data.length === 0) return [{ nombre: "Efectivo", descripcion: null, instrucciones: null }];
+    return data as MetodoPago[];
+  } catch {
+    return [{ nombre: "Efectivo", descripcion: null, instrucciones: null }];
+  }
+}
+
+export async function getMetodosEntrega(): Promise<MetodoEntrega[]> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("metodos_entrega")
+      .select("nombre, descripcion, costo")
+      .eq("activo", true)
+      .order("orden");
+    if (!data || data.length === 0)
+      return [{ nombre: "Retiro en local", descripcion: null, costo: 0 }];
+    return data as MetodoEntrega[];
+  } catch {
+    return [{ nombre: "Retiro en local", descripcion: null, costo: 0 }];
+  }
+}
+
 export async function getBeneficios(): Promise<Beneficio[]> {
   try {
     const supabase = await createClient();

@@ -4,6 +4,7 @@ import type { Producto } from "@/lib/datos";
 import { formatGs } from "@/lib/utils";
 import { GlowCard } from "@/components/public/glow-card";
 import { Reveal } from "@/components/public/reveal";
+import { AddToCart } from "@/components/public/add-to-cart";
 
 function Picante({ nivel }: { nivel: number }) {
   if (!nivel) return null;
@@ -56,6 +57,13 @@ function ProductCard({ p }: { p: Producto }) {
         {precio > 0 && (
           <p className="mt-3 font-title text-xl font-extrabold text-tinta">{formatGs(precio)}</p>
         )}
+        <AddToCart
+          productoId={p.id}
+          nombre={p.nombre}
+          precio={precio}
+          imagen={p.imagen_principal_url}
+          slug={p.slug}
+        />
       </div>
     </GlowCard>
   );

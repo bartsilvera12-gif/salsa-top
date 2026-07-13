@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
+import { CarritoProvider } from "@/lib/carrito";
 
 const barlow = Barlow({
   subsets: ["latin"],
@@ -41,7 +42,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable}`}>
-      <body>{children}</body>
+      <body>
+        <CarritoProvider>{children}</CarritoProvider>
+      </body>
     </html>
   );
 }
