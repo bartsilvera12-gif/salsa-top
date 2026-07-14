@@ -1,18 +1,17 @@
-import { requirePerfil } from "@/lib/auth";
-import { SUPER } from "@/lib/permisos";
-import { getPerfilesAdmin } from "@/lib/admin-datos";
+"use client";
+
+import { usuariosRepo } from "@/lib/repositorios/usuarios";
+import { useListado } from "@/components/admin/lista-ui";
 import { UsuarioCrearForm } from "@/components/admin/usuario-crear-form";
 import { UsuarioFila } from "@/components/admin/usuario-fila";
 
-export const dynamic = "force-dynamic";
-
-export default async function UsuariosPage() {
-  await requirePerfil(SUPER);
-  const perfiles = await getPerfilesAdmin();
+export default function UsuariosPage() {
+  const { datos, recargar } = useListado(() => usuariosRepo.listar(), []);
+  const perfiles = datos ?? [];
 
   return (
     <div className="space-y-6">
-      <UsuarioCrearForm />
+      <UsuarioCrearForm onCreado={recargar} />
 
       <div className="recuadro overflow-hidden p-0">
         <div className="border-b border-black/10 px-4 py-3 text-sm text-tinta-tenue">{perfiles.length} usuario(s)</div>

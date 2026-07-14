@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { UserPlus } from "lucide-react";
 import { Field, Input, Select } from "@/components/admin/ui";
 import { ROL_LABEL, ROLES } from "@/lib/permisos";
-import { crearUsuario } from "@/app/admin/(panel)/usuarios/actions";
+import { crearUsuarioCliente } from "@/app/admin/(panel)/usuarios/acciones-cliente";
 
 type FormValues = {
   nombre: string;
@@ -15,7 +15,7 @@ type FormValues = {
   rol: string;
 };
 
-export function UsuarioCrearForm() {
+export function UsuarioCrearForm({ onCreado }: { onCreado?: () => void }) {
   const [msg, setMsg] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const { register, handleSubmit, reset, formState } = useForm<FormValues>({
     defaultValues: { nombre: "", apellido: "", email: "", password: "", rol: "editor" },
@@ -23,11 +23,12 @@ export function UsuarioCrearForm() {
 
   const onSubmit = handleSubmit(async (values) => {
     setMsg(null);
-    const res = await crearUsuario(values);
+    const res = await crearUsuarioCliente(values);
     if ("error" in res) setMsg({ tipo: "error", texto: res.error });
     else {
       setMsg({ tipo: "ok", texto: "Usuario creado correctamente." });
       reset();
+      onCreado?.();
     }
   });
 

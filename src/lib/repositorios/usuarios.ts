@@ -1,7 +1,9 @@
 // Repositorio tipado de Usuarios (tabla `perfiles`, perfiles administrativos).
-// Nota: la CREACIÓN de usuarios requiere service_role → se resuelve vía Edge
-// Function (no en el frontend). Este repo cubre lectura/actualización/estado.
-import { crearRepo } from "@/lib/repositorios/base";
+// Lectura/rol/estado se hacen por RLS (policy perfil_super_admin_all).
+// La CREACIÓN requiere service_role → se resuelve vía Edge Function `crear-usuario`
+// (ver src/app/admin/(panel)/usuarios/acciones-cliente.ts).
+import { crearCrud } from "@/lib/crud/crud-cliente";
+import { getSupabase } from "@/lib/supabase/browser";
 
 export type Usuario = {
   id: string;
@@ -15,8 +17,18 @@ export type Usuario = {
   creado_en: string;
 };
 
-export const usuariosRepo = crearRepo<Usuario>({
-  tabla: "perfiles",
-  campoBusqueda: "nombre",
-  ordenDefault: { campo: "creado_en", asc: true },
-});
+const crud = crearCrud({ tabla: "perfiles", ordenDefault: { campo: "creado_en", asc: true } });
+
+export const usuariosRepo = {
+  /** Listado completo de perfiles (misma consulta que la vista admin). */
+  async listar(): Promise<Usuario[]> {
+    const supabase = getSupabase();
+    const { data } = await supabase
+      .from("perfiles")
+      .select("id, auth_user_id, nombre, apellido, email, rol, activo, ultimo_acceso, creado_en")
+      .order("creado_en", { ascending: true });
+    return (data as Usuario[]) ?? [];
+  },
+  cambiarRol: (id: string, rol: string) => crud.actualizar(id, { rol }),
+  alternarActivo: (id: string, activo: boolean) => crud.alternar(id, "activo", activo),
+};
