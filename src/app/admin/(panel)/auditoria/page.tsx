@@ -1,19 +1,16 @@
+"use client";
+
+import { Suspense } from "react";
 import Link from "next/link";
-import { requirePerfil } from "@/lib/auth";
-import { ADMIN } from "@/lib/permisos";
-import { getAuditoriaAdmin, PAGINA_AUDITORIA } from "@/lib/admin-datos";
+import { useSearchParams } from "next/navigation";
+import { auditoriaRepo, PAGINA_AUDITORIA } from "@/lib/repositorios/auditoria";
+import { useListado, FilaCargando, FilaVacia } from "@/components/admin/lista-ui";
 
-export const dynamic = "force-dynamic";
-
-export default async function AuditoriaPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  await requirePerfil(ADMIN);
-  const sp = await searchParams;
-  const page = Number(sp.page ?? "1") || 1;
-  const { rows, total } = await getAuditoriaAdmin(page);
+function AuditoriaInterior() {
+  const sp = useSearchParams();
+  const page = Number(sp.get("page") ?? "1") || 1;
+  const { datos, cargando } = useListado(() => auditoriaRepo.listar(page), [page]);
+  const { rows, total } = datos ?? { rows: [], total: 0 };
   const paginas = Math.max(1, Math.ceil(total / PAGINA_AUDITORIA));
 
   return (
@@ -32,8 +29,9 @@ export default async function AuditoriaPage({
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-tinta-tenue">Sin registros de auditoría.</td></tr>}
-              {rows.map((a) => (
+              {cargando && <FilaCargando cols={4} />}
+              {!cargando && rows.length === 0 && <FilaVacia cols={4} texto="Sin registros de auditoría." />}
+              {!cargando && rows.map((a) => (
                 <tr key={a.id} className="border-b border-black/5 last:border-0">
                   <td className="px-4 py-3 text-tinta-tenue">{new Date(a.creado_en).toLocaleString("es-PY")}</td>
                   <td className="px-4 py-3 text-tinta-suave">{a.usuario ?? "—"}</td>
@@ -50,10 +48,18 @@ export default async function AuditoriaPage({
         <div className="flex items-center justify-center gap-2">
           {Array.from({ length: Math.min(paginas, 20) }).map((_, i) => {
             const n = i + 1;
-            return <Link key={n} href={`/admin/auditoria?page=${n}`} className={n === page ? "rounded-lg bg-fuego-gradient px-3.5 py-2 text-sm font-bold text-[#1a0e00]" : "rounded-lg border border-black/15 px-3.5 py-2 text-sm font-semibold text-tinta hover:bg-black/5"}>{n}</Link>;
+            return <Link key={n} href={`/admin/auditoria/?page=${n}`} className={n === page ? "rounded-lg bg-fuego-gradient px-3.5 py-2 text-sm font-bold text-[#1a0e00]" : "rounded-lg border border-black/15 px-3.5 py-2 text-sm font-semibold text-tinta hover:bg-black/5"}>{n}</Link>;
           })}
         </div>
       )}
     </div>
+  );
+}
+
+export default function AuditoriaPage() {
+  return (
+    <Suspense fallback={<div className="py-10 text-center text-tinta-tenue">Cargando…</div>}>
+      <AuditoriaInterior />
+    </Suspense>
   );
 }
