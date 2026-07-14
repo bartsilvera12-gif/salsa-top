@@ -1,20 +1,30 @@
-import { requirePerfil } from "@/lib/auth";
-import { ADMIN } from "@/lib/permisos";
-import { getConfiguracionAdmin } from "@/lib/admin-datos";
+"use client";
+
+import { useEffect, useState } from "react";
+import { configuracionRepo, type Configuracion } from "@/lib/repositorios/configuracion";
 import { ConfiguracionForm } from "@/components/admin/configuracion-form";
 
-export const dynamic = "force-dynamic";
+export default function ConfiguracionPage() {
+  const [config, setConfig] = useState<Configuracion | null>(null);
+  const [cargando, setCargando] = useState(true);
 
-export default async function ConfiguracionPage() {
-  await requirePerfil(ADMIN);
-  const config = await getConfiguracionAdmin();
+  useEffect(() => {
+    configuracionRepo.obtener().then((c) => {
+      setConfig(c);
+      setCargando(false);
+    });
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl">
       <p className="mb-5 text-sm text-tinta-tenue">
         Estos datos alimentan la web pública (marca, contacto, redes, envíos).
       </p>
-      <ConfiguracionForm config={config} />
+      {cargando ? (
+        <p className="py-10 text-center text-tinta-tenue">Cargando…</p>
+      ) : (
+        <ConfiguracionForm config={config} />
+      )}
     </div>
   );
 }

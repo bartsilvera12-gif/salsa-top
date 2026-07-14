@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Field, Input, Textarea, Toggle } from "@/components/admin/ui";
-import { guardarConfiguracion } from "@/app/admin/(panel)/configuracion/actions";
-import type { ConfiguracionRow } from "@/lib/admin-datos";
+import { guardarConfiguracionCliente } from "@/app/admin/(panel)/configuracion/acciones-cliente";
+import type { Configuracion } from "@/lib/repositorios/configuracion";
 
 type FormValues = {
   nombre_marca: string;
@@ -41,7 +41,7 @@ function Section({ titulo, children }: { titulo: string; children: React.ReactNo
 
 const s = (v: number | null | undefined) => (v == null ? "" : String(v));
 
-export function ConfiguracionForm({ config }: { config: ConfiguracionRow | null }) {
+export function ConfiguracionForm({ config }: { config: Configuracion | null }) {
   const [msg, setMsg] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const { register, handleSubmit, watch, setValue, formState } = useForm<FormValues>({
     defaultValues: {
@@ -71,7 +71,7 @@ export function ConfiguracionForm({ config }: { config: ConfiguracionRow | null 
 
   const onSubmit = handleSubmit(async (values) => {
     setMsg(null);
-    const res = await guardarConfiguracion(config?.id ?? null, values);
+    const res = await guardarConfiguracionCliente(config?.id ?? null, values);
     if ("error" in res) setMsg({ tipo: "error", texto: res.error });
     else setMsg({ tipo: "ok", texto: "Configuración guardada." });
   });
