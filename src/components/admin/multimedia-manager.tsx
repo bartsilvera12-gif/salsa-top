@@ -2,17 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { UploadCloud, Trash2, Copy, Check } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/browser";
 import { slugify } from "@/lib/utils";
-import { registrarArchivo, eliminarArchivo } from "@/app/admin/(panel)/multimedia/actions";
-import type { ArchivoRow } from "@/lib/admin-datos";
+import { registrarArchivoCliente, eliminarArchivoCliente } from "@/app/admin/(panel)/multimedia/acciones-cliente";
+import type { Archivo } from "@/lib/repositorios/archivos";
 
 const BUCKET = "saltatop-general";
 
-export function MultimediaManager({ archivos }: { archivos: ArchivoRow[] }) {
-  const router = useRouter();
+export function MultimediaManager({ archivos, recargar }: { archivos: Archivo[]; recargar: () => void }) {
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState<string | null>(null);
@@ -26,19 +24,19 @@ export function MultimediaManager({ archivos }: { archivos: ArchivoRow[] }) {
 
     setSubiendo(true);
     try {
-      const supabase = createClient();
+      const supabase = getSupabase();
       const ext = file.name.split(".").pop() ?? "jpg";
       const base = slugify(file.name.replace(/\.[^.]+$/, "")) || "archivo";
       const path = `biblioteca/${Date.now()}-${base}.${ext}`;
       const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: "3600" });
       if (upErr) { setError("No se pudo subir."); return; }
       const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      const res = await registrarArchivo({
+      const res = await registrarArchivoCliente({
         nombre: file.name, url: data.publicUrl, ruta_storage: path,
         mime_type: file.type, tamano_bytes: file.size,
       });
       if ("error" in res) { setError(res.error); return; }
-      router.refresh();
+      recargar();
     } finally {
       setSubiendo(false);
       e.target.value = "";
@@ -70,7 +68,7 @@ export function MultimediaManager({ archivos }: { archivos: ArchivoRow[] }) {
               <button type="button" onClick={() => copiar(a.url)} className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-acento hover:bg-black/5">
                 {copiado === a.url ? <><Check size={13} /> Copiado</> : <><Copy size={13} /> URL</>}
               </button>
-              <button type="button" onClick={() => { void eliminarArchivo(a.id, a.ruta_storage).then(() => router.refresh()); }} className="rounded-lg p-1.5 text-fuego-rojo hover:bg-fuego-rojo/10" aria-label="Eliminar">
+              <button type="button" onClick={() => { void eliminarArchivoCliente(a.id, a.ruta_storage).then(() => recargar()); }} className="rounded-lg p-1.5 text-fuego-rojo hover:bg-fuego-rojo/10" aria-label="Eliminar">
                 <Trash2 size={14} />
               </button>
             </div>
