@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Field, Input, Textarea, Toggle } from "@/components/admin/ui";
 import { ImageUploader } from "@/components/admin/image-uploader";
-import { guardarBanner } from "@/app/admin/(panel)/banners/actions";
-import type { BannerRow } from "@/lib/admin-datos";
+import { MensajeError } from "@/components/admin/lista-ui";
+import { guardarBannerCliente } from "@/app/admin/(panel)/banners/acciones-cliente";
+import type { Banner } from "@/lib/repositorios/banners";
 
 type FormValues = {
   titulo: string;
@@ -27,8 +29,9 @@ type FormValues = {
 
 const paraInput = (iso: string | null) => (iso ? iso.slice(0, 16) : "");
 
-export function BannerForm({ banner }: { banner: BannerRow | null }) {
+export function BannerForm({ banner }: { banner: Banner | null }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
   const { register, handleSubmit, watch, setValue, formState } = useForm<FormValues>({
     defaultValues: {
       titulo: banner?.titulo ?? "",
@@ -50,13 +53,17 @@ export function BannerForm({ banner }: { banner: BannerRow | null }) {
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
-    const res = await guardarBanner(banner?.id ?? null, values);
-    if (res && "error" in res) setServerError(res.error);
+    const res = await guardarBannerCliente(banner?.id ?? null, values);
+    if ("error" in res) {
+      setServerError(res.error);
+      return;
+    }
+    router.push("/admin/banners/");
   });
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {serverError && <p className="rounded-xl border border-fuego-rojo/30 bg-fuego-rojo/10 px-4 py-3 text-sm font-medium text-fuego-rojo">{serverError}</p>}
+      <MensajeError>{serverError}</MensajeError>
       <div className="recuadro space-y-4 p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Título" htmlFor="titulo"><Input id="titulo" {...register("titulo")} /></Field>
@@ -80,7 +87,7 @@ export function BannerForm({ banner }: { banner: BannerRow | null }) {
         </div>
       </div>
       <div className="flex items-center justify-end gap-3">
-        <Link href="/admin/banners" className="btn-contorno">Cancelar</Link>
+        <Link href="/admin/banners/" className="btn-contorno">Cancelar</Link>
         <button type="submit" disabled={formState.isSubmitting} className="btn-fuego disabled:opacity-60">
           {formState.isSubmitting ? "Guardando…" : "Guardar banner"}
         </button>
