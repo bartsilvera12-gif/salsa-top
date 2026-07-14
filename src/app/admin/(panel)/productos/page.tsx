@@ -7,16 +7,13 @@ import { useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { formatGs } from "@/lib/utils";
 import { totalPaginas } from "@/lib/crud/paginacion";
-import {
-  getProductosAdminCliente,
-  getCategoriasOpcionesCliente,
-  PAGINA_PRODUCTOS,
-} from "@/lib/admin-datos-cliente";
+import { productosRepo } from "@/lib/repositorios/productos";
+import { categoriasRepo } from "@/lib/repositorios/categorias";
 import { alternarActivoCliente, eliminarProductoCliente } from "./acciones-cliente";
 import { useListado, Paginacion, BotonConfirmar, FilaCargando, FilaVacia } from "@/components/admin/lista-ui";
 import { Buscador, FiltroSelect, BarraFiltros } from "@/components/admin/filtros-ui";
 import { useToast } from "@/components/admin/toast";
-import type { Opcion } from "@/lib/admin-datos";
+import type { Opcion } from "@/lib/crud/tipos";
 
 function ProductosLista() {
   const sp = useSearchParams();
@@ -27,16 +24,16 @@ function ProductosLista() {
   const toast = useToast();
 
   const { datos, cargando, recargar } = useListado(
-    () => getProductosAdminCliente({ q, estado, categoria, page }),
+    () => productosRepo.listar({ q, estado, categoria, page }),
     [q, estado, categoria, page],
   );
   const [categorias, setCategorias] = useState<Opcion[]>([]);
   useEffect(() => {
-    getCategoriasOpcionesCliente().then(setCategorias);
+    categoriasRepo.opciones().then(setCategorias);
   }, []);
 
   const lista = datos ?? { rows: [], total: 0 };
-  const paginas = totalPaginas(lista.total, PAGINA_PRODUCTOS);
+  const paginas = totalPaginas(lista.total, productosRepo.pageSize);
 
   async function onEliminar(id: string, nombre: string) {
     const r = await eliminarProductoCliente(id);

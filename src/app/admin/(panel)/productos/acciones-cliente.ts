@@ -1,7 +1,6 @@
-// Escrituras de Productos usando la infraestructura CRUD compartida + browser client.
+// Escrituras de Productos usando el repositorio tipado (sobre crearCrud).
 // Seguridad por RLS (admin_all_productos). Sin service_role, sin server actions.
-import { crudProductos } from "@/lib/admin-datos-cliente";
-import { getSupabase } from "@/lib/supabase/browser";
+import { productosRepo } from "@/lib/repositorios/productos";
 import { productoSchema } from "@/lib/schemas";
 
 type Resultado = { ok: true } | { error: string };
@@ -45,49 +44,34 @@ export async function guardarProductoCliente(id: string | null, input: unknown):
 
   let productoId = id;
   if (id) {
-    const r = await crudProductos.actualizar(id, payload);
+    const r = await productosRepo.actualizar(id, payload);
     if (!r.ok) return { error: r.error };
   } else {
-    const r = await crudProductos.insertar(payload);
+    const r = await productosRepo.crear(payload);
     if (!r.ok) return { error: r.error };
     productoId = r.data.id;
   }
 
-  // Sincronizar etiquetas (tabla puente): borrar y reinsertar.
+  // Sincronizar etiquetas (tabla puente producto_etiquetas).
   if (productoId) {
-    const supabase = getSupabase();
-    await supabase.from("producto_etiquetas").delete().eq("producto_id", productoId);
-    if (d.etiquetas.length > 0) {
-      await supabase
-        .from("producto_etiquetas")
-        .insert(d.etiquetas.map((etiqueta_id) => ({ producto_id: productoId, etiqueta_id })));
-    }
+    const r = await productosRepo.sincronizarEtiquetas(productoId, d.etiquetas);
+    if (!r.ok) return { error: r.error };
   }
 
   return { ok: true };
 }
 
 export async function alternarActivoCliente(id: string, activo: boolean): Promise<Resultado> {
-  const r = await crudProductos.alternar(id, "activo", activo);
+  const r = await productosRepo.alternarActivo(id, activo);
   return r.ok ? { ok: true } : { error: r.error };
 }
 
 export async function eliminarProductoCliente(id: string): Promise<Resultado> {
-  const r = await crudProductos.eliminar(id);
+  const r = await productosRepo.eliminar(id);
   return r.ok ? { ok: true } : { error: r.error };
 }
 
 export async function duplicarProductoCliente(id: string): Promise<Resultado> {
-  const r = await crudProductos.duplicar(id, (fila) => {
-    delete fila.id;
-    delete fila.creado_en;
-    delete fila.actualizado_en;
-    fila.nombre = `${String(fila.nombre)} (copia)`;
-    fila.slug = `${String(fila.slug)}-copia-${Date.now().toString(36)}`;
-    fila.codigo = null;
-    fila.activo = false;
-    fila.destacado = false;
-    return fila;
-  });
+  const r = await productosRepo.duplicar(id);
   return r.ok ? { ok: true } : { error: r.error };
 }

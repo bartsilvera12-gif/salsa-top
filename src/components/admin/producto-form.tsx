@@ -9,7 +9,8 @@ import { Field, Input, Textarea, Select, Toggle } from "@/components/admin/ui";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { MensajeError } from "@/components/admin/lista-ui";
 import { guardarProductoCliente } from "@/app/admin/(panel)/productos/acciones-cliente";
-import type { ProductoRow, Opcion } from "@/lib/admin-datos";
+import type { Producto } from "@/lib/repositorios/productos";
+import type { Opcion } from "@/lib/crud/tipos";
 
 type FormValues = {
   nombre: string;
@@ -55,7 +56,7 @@ export function ProductoForm({
   categorias,
   etiquetas,
 }: {
-  producto: ProductoRow | null;
+  producto: Producto | null;
   etiquetasProducto: string[];
   categorias: Opcion[];
   etiquetas: Opcion[];

@@ -6,6 +6,9 @@ export type Resultado<T = void> = { ok: true; data: T } | { ok: false; error: st
 /** Listado paginado. */
 export type Lista<T> = { rows: T[]; total: number };
 
+/** Opción para selects (id + nombre). */
+export type Opcion = { id: string; nombre: string };
+
 /** Un filtro de igualdad (campo = valor). */
 export type Filtro = { campo: string; valor: string | number | boolean };
 

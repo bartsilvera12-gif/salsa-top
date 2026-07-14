@@ -3,19 +3,17 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  getProductoByIdCliente,
-  getCategoriasOpcionesCliente,
-  getEtiquetasOpcionesCliente,
-} from "@/lib/admin-datos-cliente";
+import { productosRepo, type Producto } from "@/lib/repositorios/productos";
+import { categoriasRepo } from "@/lib/repositorios/categorias";
+import { etiquetasRepo } from "@/lib/repositorios/etiquetas";
 import { ProductoForm } from "@/components/admin/producto-form";
-import type { ProductoRow, Opcion } from "@/lib/admin-datos";
+import type { Opcion } from "@/lib/crud/tipos";
 
 function EditarInterior() {
   const sp = useSearchParams();
   const id = sp.get("id");
 
-  const [data, setData] = useState<{ producto: ProductoRow; etiquetas: string[] } | null>(null);
+  const [data, setData] = useState<{ producto: Producto; etiquetas: string[] } | null>(null);
   const [categorias, setCategorias] = useState<Opcion[]>([]);
   const [etiquetas, setEtiquetas] = useState<Opcion[]>([]);
   const [estado, setEstado] = useState<"cargando" | "ok" | "nohay">("cargando");
@@ -26,9 +24,9 @@ function EditarInterior() {
       return;
     }
     Promise.all([
-      getProductoByIdCliente(id),
-      getCategoriasOpcionesCliente(),
-      getEtiquetasOpcionesCliente(),
+      productosRepo.obtener(id),
+      categoriasRepo.opciones(),
+      etiquetasRepo.opciones(),
     ]).then(([d, c, e]) => {
       setCategorias(c);
       setEtiquetas(e);

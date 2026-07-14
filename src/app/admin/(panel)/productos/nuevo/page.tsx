@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getCategoriasOpcionesCliente, getEtiquetasOpcionesCliente } from "@/lib/admin-datos-cliente";
+import { categoriasRepo } from "@/lib/repositorios/categorias";
+import { etiquetasRepo } from "@/lib/repositorios/etiquetas";
 import { ProductoForm } from "@/components/admin/producto-form";
-import type { Opcion } from "@/lib/admin-datos";
+import type { Opcion } from "@/lib/crud/tipos";
 
 export default function NuevoProductoPage() {
   const [categorias, setCategorias] = useState<Opcion[]>([]);
@@ -11,7 +12,7 @@ export default function NuevoProductoPage() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    Promise.all([getCategoriasOpcionesCliente(), getEtiquetasOpcionesCliente()]).then(([c, e]) => {
+    Promise.all([categoriasRepo.opciones(), etiquetasRepo.opciones()]).then(([c, e]) => {
       setCategorias(c);
       setEtiquetas(e);
       setCargando(false);
