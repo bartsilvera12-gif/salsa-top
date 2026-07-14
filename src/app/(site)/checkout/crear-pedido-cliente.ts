@@ -1,6 +1,9 @@
-"use server";
-
-import { createClient } from "@/lib/supabase/server";
+// Crea el pedido llamando a la RPC segura saltatop.crear_pedido DESDE EL NAVEGADOR.
+// - El cliente browser usa la anon key; la RPC tiene GRANT EXECUTE a anon/authenticated.
+// - La RPC es SECURITY DEFINER y recalcula precios/total dentro de PostgreSQL:
+//   el frontend NO envía precios ni total (solo producto_id, cantidad y datos del cliente).
+// Reemplaza al server action crearPedidoAction (mismo contrato y comportamiento).
+import { getSupabase } from "@/lib/supabase/browser";
 
 export type ClientePedido = {
   nombre: string;
@@ -33,17 +36,13 @@ export type RespuestaPedido =
   | { ok: true; numero: string; total: number }
   | { ok: false; error: string };
 
-/**
- * Crea el pedido llamando a la RPC segura saltatop.crear_pedido, que
- * recalcula precios/total en la base (no confía en el cliente).
- */
-export async function crearPedidoAction(input: EntradaPedido): Promise<RespuestaPedido> {
+export async function crearPedidoCliente(input: EntradaPedido): Promise<RespuestaPedido> {
   if (!input.items || input.items.length === 0) return { ok: false, error: "El carrito está vacío." };
   if (!input.cliente?.nombre || !input.cliente?.telefono) {
     return { ok: false, error: "Completá tu nombre y teléfono." };
   }
 
-  const supabase = await createClient();
+  const supabase = getSupabase();
   const { data, error } = await supabase.rpc("crear_pedido", {
     p_cliente: input.cliente,
     p_items: input.items,

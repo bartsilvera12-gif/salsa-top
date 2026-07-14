@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { useCarrito } from "@/lib/carrito";
 import { formatGs } from "@/lib/utils";
 import { waLink } from "@/lib/whatsapp";
-import { crearPedidoAction } from "@/app/(site)/checkout/actions";
+import { crearPedidoCliente } from "@/app/(site)/checkout/crear-pedido-cliente";
 import type { MetodoPago, MetodoEntrega } from "@/lib/datos";
 
 type FormValues = {
@@ -60,7 +60,7 @@ export function CheckoutForm({
     setError(null);
     if (items.length === 0) { setError("Tu carrito está vacío."); return; }
 
-    const res = await crearPedidoAction({
+    const res = await crearPedidoCliente({
       cliente: {
         nombre: v.nombre, apellido: v.apellido, telefono: v.telefono, email: v.email,
         ciudad: v.ciudad, barrio: v.barrio, direccion: v.direccion, referencia: v.referencia,
