@@ -1,26 +1,37 @@
+"use client";
+
 import Link from "next/link";
 import { Plus, Pencil } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
-import { getSeccionesAdmin } from "@/lib/admin-datos";
-import { alternarActivaSeccion } from "./actions";
+import { seccionesRepo } from "@/lib/repositorios/secciones";
+import { alternarActivaSeccionCliente } from "./acciones-cliente";
+import { useListado } from "@/components/admin/lista-ui";
+import { useToast } from "@/components/admin/toast";
 
-export const dynamic = "force-dynamic";
+export default function ContenidoPage() {
+  const toast = useToast();
+  const { datos, cargando, recargar } = useListado(() => seccionesRepo.listar(), []);
+  const secciones = datos ?? [];
 
-export default async function ContenidoPage() {
-  await requirePerfil(CONTENIDO);
-  const secciones = await getSeccionesAdmin();
+  async function onAlternar(id: string, activa: boolean) {
+    const r = await alternarActivaSeccionCliente(id, activa);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(activa ? "Sección visible" : "Sección oculta");
+      recargar();
+    }
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-tinta-tenue">Secciones editables del sitio público</p>
-        <Link href="/admin/contenido/nuevo" className="btn-fuego"><Plus size={18} /> Nueva sección</Link>
+        <Link href="/admin/contenido/nuevo/" className="btn-fuego"><Plus size={18} /> Nueva sección</Link>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {secciones.length === 0 && <p className="text-tinta-tenue">No hay secciones.</p>}
-        {secciones.map((s) => (
+        {cargando && <p className="text-tinta-tenue">Cargando…</p>}
+        {!cargando && secciones.length === 0 && <p className="text-tinta-tenue">No hay secciones.</p>}
+        {!cargando && secciones.map((s) => (
           <div key={s.id} className="recuadro p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -35,14 +46,12 @@ export default async function ContenidoPage() {
               </span>
             </div>
             <div className="mt-4 flex items-center gap-2">
-              <Link href={`/admin/contenido/${s.id}`} className="btn-contorno px-4 py-2 text-xs">
+              <Link href={`/admin/contenido/editar/?id=${s.id}`} className="btn-contorno px-4 py-2 text-xs">
                 <Pencil size={14} /> Editar
               </Link>
-              <form action={alternarActivaSeccion.bind(null, s.id, !s.activa)}>
-                <button type="submit" className="rounded-lg px-3 py-2 text-xs font-semibold text-acento hover:bg-black/5">
-                  {s.activa ? "Ocultar" : "Mostrar"}
-                </button>
-              </form>
+              <button type="button" onClick={() => onAlternar(s.id, !s.activa)} className="rounded-lg px-3 py-2 text-xs font-semibold text-acento hover:bg-black/5">
+                {s.activa ? "Ocultar" : "Mostrar"}
+              </button>
             </div>
           </div>
         ))}
