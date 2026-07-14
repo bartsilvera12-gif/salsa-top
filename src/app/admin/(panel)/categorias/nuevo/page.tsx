@@ -1,11 +1,8 @@
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
+"use client";
+
 import { CategoriaForm } from "@/components/admin/categoria-form";
 
-export const dynamic = "force-dynamic";
-
-export default async function NuevaCategoriaPage() {
-  await requirePerfil(CONTENIDO);
+export default function NuevaCategoriaPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <h2 className="mb-5 font-title text-2xl font-extrabold uppercase text-tinta">Nueva categoría</h2>

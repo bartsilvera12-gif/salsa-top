@@ -1,21 +1,40 @@
+"use client";
+
 import Link from "next/link";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
-import { getCategoriasAdmin } from "@/lib/admin-datos";
-import { alternarActivaCategoria, eliminarCategoria } from "./actions";
+import { categoriasRepo } from "@/lib/repositorios/categorias";
+import { alternarActivaCategoriaCliente, eliminarCategoriaCliente } from "./acciones-cliente";
+import { useListado, BotonConfirmar, FilaCargando, FilaVacia } from "@/components/admin/lista-ui";
+import { useToast } from "@/components/admin/toast";
 
-export const dynamic = "force-dynamic";
+export default function CategoriasPage() {
+  const toast = useToast();
+  const { datos, cargando, recargar } = useListado(() => categoriasRepo.listarConConteo(), []);
+  const categorias = datos ?? [];
 
-export default async function CategoriasPage() {
-  await requirePerfil(CONTENIDO);
-  const categorias = await getCategoriasAdmin();
+  async function onEliminar(id: string, nombre: string) {
+    const r = await eliminarCategoriaCliente(id);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(`"${nombre}" eliminada`);
+      recargar();
+    }
+  }
+
+  async function onAlternar(id: string, activa: boolean) {
+    const r = await alternarActivaCategoriaCliente(id, activa);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(activa ? "Categoría activada" : "Categoría desactivada");
+      recargar();
+    }
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-tinta-tenue">{categorias.length} categoría(s)</p>
-        <Link href="/admin/categorias/nuevo" className="btn-fuego">
+        <Link href="/admin/categorias/nuevo/" className="btn-fuego">
           <Plus size={18} /> Nueva categoría
         </Link>
       </div>
@@ -34,48 +53,52 @@ export default async function CategoriasPage() {
               </tr>
             </thead>
             <tbody>
-              {categorias.length === 0 && (
-                <tr><td colSpan={6} className="px-4 py-10 text-center text-tinta-tenue">No hay categorías.</td></tr>
-              )}
-              {categorias.map((c) => (
-                <tr key={c.id} className="border-b border-black/5 last:border-0">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: c.color ?? "#FF8200" }} />
-                      <span className="font-semibold text-tinta">{c.nombre}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-tinta-suave">{c.slug}</td>
-                  <td className="px-4 py-3 text-tinta-suave">{c.productos}</td>
-                  <td className="px-4 py-3 text-tinta-suave">{c.orden}</td>
-                  <td className="px-4 py-3">
-                    <span className={c.activa
-                      ? "rounded-full bg-petroleo/10 px-2.5 py-1 text-xs font-semibold text-petroleo"
-                      : "rounded-full bg-black/10 px-2.5 py-1 text-xs font-semibold text-tinta-tenue"}>
-                      {c.activa ? "Activa" : "Inactiva"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <Link href={`/admin/categorias/${c.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar">
-                        <Pencil size={16} />
-                      </Link>
-                      <form action={alternarActivaCategoria.bind(null, c.id, !c.activa)}>
-                        <button type="submit" className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5">
+              {cargando && <FilaCargando cols={6} />}
+              {!cargando && categorias.length === 0 && <FilaVacia cols={6} texto="No hay categorías." />}
+              {!cargando &&
+                categorias.map((c) => (
+                  <tr key={c.id} className="border-b border-black/5 last:border-0">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: c.color ?? "#FF8200" }} />
+                        <span className="font-semibold text-tinta">{c.nombre}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-tinta-suave">{c.slug}</td>
+                    <td className="px-4 py-3 text-tinta-suave">{c.productos}</td>
+                    <td className="px-4 py-3 text-tinta-suave">{c.orden}</td>
+                    <td className="px-4 py-3">
+                      <span className={c.activa
+                        ? "rounded-full bg-petroleo/10 px-2.5 py-1 text-xs font-semibold text-petroleo"
+                        : "rounded-full bg-black/10 px-2.5 py-1 text-xs font-semibold text-tinta-tenue"}>
+                        {c.activa ? "Activa" : "Inactiva"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link href={`/admin/categorias/editar/?id=${c.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar">
+                          <Pencil size={16} />
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => onAlternar(c.id, !c.activa)}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5"
+                        >
                           {c.activa ? "Desactivar" : "Activar"}
                         </button>
-                      </form>
-                      {c.productos === 0 && (
-                        <form action={eliminarCategoria.bind(null, c.id)}>
-                          <button type="submit" className="rounded-lg p-2 text-fuego-rojo hover:bg-fuego-rojo/10" aria-label="Eliminar">
+                        {c.productos === 0 && (
+                          <BotonConfirmar
+                            mensaje={`¿Eliminar "${c.nombre}"? Esta acción no se puede deshacer.`}
+                            onConfirmar={() => onEliminar(c.id, c.nombre)}
+                            ariaLabel={`Eliminar ${c.nombre}`}
+                          >
                             <Trash2 size={16} />
-                          </button>
-                        </form>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          </BotonConfirmar>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { slugify } from "@/lib/utils";
 import { Field, Input, Textarea, Toggle } from "@/components/admin/ui";
 import { ImageUploader } from "@/components/admin/image-uploader";
-import { guardarCategoria } from "@/app/admin/(panel)/categorias/actions";
-import type { CategoriaRow } from "@/lib/admin-datos";
+import { MensajeError } from "@/components/admin/lista-ui";
+import { guardarCategoriaCliente } from "@/app/admin/(panel)/categorias/acciones-cliente";
+import type { Categoria } from "@/lib/repositorios/categorias";
 
 type FormValues = {
   nombre: string;
@@ -20,8 +22,9 @@ type FormValues = {
   activa: boolean;
 };
 
-export function CategoriaForm({ categoria }: { categoria: CategoriaRow | null }) {
+export function CategoriaForm({ categoria }: { categoria: Categoria | null }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
   const { register, handleSubmit, watch, setValue, getValues, formState } = useForm<FormValues>({
     defaultValues: {
       nombre: categoria?.nombre ?? "",
@@ -37,17 +40,17 @@ export function CategoriaForm({ categoria }: { categoria: CategoriaRow | null })
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
-    const res = await guardarCategoria(categoria?.id ?? null, values);
-    if (res && "error" in res) setServerError(res.error);
+    const res = await guardarCategoriaCliente(categoria?.id ?? null, values);
+    if ("error" in res) {
+      setServerError(res.error);
+      return;
+    }
+    router.push("/admin/categorias/");
   });
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {serverError && (
-        <p className="rounded-xl border border-fuego-rojo/30 bg-fuego-rojo/10 px-4 py-3 text-sm font-medium text-fuego-rojo">
-          {serverError}
-        </p>
-      )}
+      <MensajeError>{serverError}</MensajeError>
       <div className="recuadro space-y-4 p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nombre" htmlFor="nombre" error={formState.errors.nombre?.message}>
@@ -78,7 +81,7 @@ export function CategoriaForm({ categoria }: { categoria: CategoriaRow | null })
         </div>
       </div>
       <div className="flex items-center justify-end gap-3">
-        <Link href="/admin/categorias" className="btn-contorno">Cancelar</Link>
+        <Link href="/admin/categorias/" className="btn-contorno">Cancelar</Link>
         <button type="submit" disabled={formState.isSubmitting} className="btn-fuego disabled:opacity-60">
           {formState.isSubmitting ? "Guardando…" : "Guardar categoría"}
         </button>
