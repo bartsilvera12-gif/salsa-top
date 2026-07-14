@@ -1,30 +1,72 @@
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { requirePerfil } from "@/lib/auth";
-import { OPERACIONES } from "@/lib/permisos";
-import { getClienteAdmin } from "@/lib/admin-datos";
+import { useSearchParams } from "next/navigation";
+import { clientesRepo, type ClienteDetalle } from "@/lib/repositorios/clientes";
 import { formatGs } from "@/lib/utils";
 import { EstadoBadge } from "@/components/admin/estado-badge";
 import { NotaInterna } from "@/components/admin/nota-interna";
-import { alternarActivoCliente, guardarNotaCliente } from "../actions";
+import { alternarActivoCliente, guardarNotaCliente } from "../acciones-cliente";
+import { useToast } from "@/components/admin/toast";
 
-export const dynamic = "force-dynamic";
+function ClienteDetalleInterior() {
+  const sp = useSearchParams();
+  const id = sp.get("id");
+  const toast = useToast();
 
-export default async function ClienteDetallePage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePerfil(OPERACIONES);
-  const { id } = await params;
-  const c = await getClienteAdmin(id);
-  if (!c) notFound();
+  const [c, setC] = useState<ClienteDetalle | null>(null);
+  const [estado, setEstado] = useState<"cargando" | "ok" | "nohay">("cargando");
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!id) {
+      setEstado("nohay");
+      return;
+    }
+    let vivo = true;
+    setEstado("cargando");
+    clientesRepo.obtenerDetalle(id).then((d) => {
+      if (!vivo) return;
+      if (!d) setEstado("nohay");
+      else {
+        setC(d);
+        setEstado("ok");
+      }
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [id, tick]);
+
+  if (estado === "cargando") {
+    return <p className="py-10 text-center text-tinta-tenue">Cargando…</p>;
+  }
+  if (estado === "nohay" || !c || !id) {
+    return (
+      <div className="recuadro p-10 text-center">
+        <p className="text-tinta-suave">Cliente no encontrado.</p>
+        <Link href="/admin/clientes/" className="btn-fuego mt-4">Volver a clientes</Link>
+      </div>
+    );
+  }
 
   const ultima = c.pedidos[0]?.creado_en;
+
+  async function onAlternar() {
+    const r = await alternarActivoCliente(id!, !c!.activo);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(c!.activo ? "Cliente desactivado" : "Cliente activado");
+      setTick((t) => t + 1);
+    }
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-title text-2xl font-extrabold uppercase text-tinta">{c.nombre} {c.apellido ?? ""}</h2>
-        <form action={alternarActivoCliente.bind(null, id, !c.activo)}>
-          <button type="submit" className="btn-contorno px-4 py-2 text-sm">{c.activo ? "Desactivar" : "Activar"}</button>
-        </form>
+        <button type="button" onClick={onAlternar} className="btn-contorno px-4 py-2 text-sm">{c.activo ? "Desactivar" : "Activar"}</button>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
@@ -49,7 +91,7 @@ export default async function ClienteDetallePage({ params }: { params: Promise<{
           </div>
           <div className="recuadro p-5">
             <h3 className="mb-3 font-title text-sm font-bold uppercase tracking-widest text-acento">Notas internas</h3>
-            <NotaInterna valorInicial={c.notas ?? ""} guardar={guardarNotaCliente.bind(null, id)} />
+            <NotaInterna valorInicial={c.notas ?? ""} guardar={(nota) => guardarNotaCliente(id, nota)} />
           </div>
         </aside>
 
@@ -63,7 +105,7 @@ export default async function ClienteDetallePage({ params }: { params: Promise<{
               {c.pedidos.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-tinta-tenue">Sin pedidos.</td></tr>}
               {c.pedidos.map((p) => (
                 <tr key={p.id} className="border-b border-black/5 last:border-0">
-                  <td className="px-4 py-3"><Link href={`/admin/pedidos/${p.id}`} className="font-semibold text-acento hover:underline">{p.numero}</Link></td>
+                  <td className="px-4 py-3"><Link href={`/admin/pedidos/ver/?id=${p.id}`} className="font-semibold text-acento hover:underline">{p.numero}</Link></td>
                   <td className="px-4 py-3"><EstadoBadge estado={p.estado} /></td>
                   <td className="px-4 py-3 font-semibold text-tinta">{formatGs(p.total)}</td>
                   <td className="px-4 py-3 text-tinta-suave">{new Date(p.creado_en).toLocaleDateString("es-PY")}</td>
@@ -74,5 +116,13 @@ export default async function ClienteDetallePage({ params }: { params: Promise<{
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ClienteVerPage() {
+  return (
+    <Suspense fallback={<p className="py-10 text-center text-tinta-tenue">Cargando…</p>}>
+      <ClienteDetalleInterior />
+    </Suspense>
   );
 }
