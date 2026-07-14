@@ -1,34 +1,36 @@
-import Link from "next/link";
-import { Search, Eye } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { OPERACIONES } from "@/lib/permisos";
-import { getPedidosAdmin, PAGINA_PEDIDOS } from "@/lib/admin-datos";
-import { formatGs } from "@/lib/utils";
-import { EstadoBadge } from "@/components/admin/estado-badge";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { Suspense } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Search, Eye } from "lucide-react";
+import { formatGs } from "@/lib/utils";
+import { totalPaginas } from "@/lib/crud/paginacion";
+import { pedidosRepo } from "@/lib/repositorios/pedidos";
+import { EstadoBadge } from "@/components/admin/estado-badge";
+import { useListado, Paginacion, FilaCargando, FilaVacia } from "@/components/admin/lista-ui";
 
 const ESTADOS = ["todos", "pendiente", "confirmado", "preparando", "listo", "enviado", "entregado", "cancelado"];
 const PAGOS = ["todos", "pendiente", "pagado", "rechazado", "reembolsado"];
 
-export default async function PedidosPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; estado?: string; pago?: string; page?: string }>;
-}) {
-  await requirePerfil(OPERACIONES);
-  const sp = await searchParams;
-  const q = sp.q ?? "";
-  const estado = sp.estado ?? "todos";
-  const pago = sp.pago ?? "todos";
-  const page = Number(sp.page ?? "1") || 1;
+function PedidosLista() {
+  const sp = useSearchParams();
+  const q = sp.get("q") ?? "";
+  const estado = sp.get("estado") ?? "todos";
+  const pago = sp.get("pago") ?? "todos";
+  const page = Number(sp.get("page") ?? "1") || 1;
 
-  const { rows, total } = await getPedidosAdmin({ q, estado, estadoPago: pago, page });
-  const paginas = Math.max(1, Math.ceil(total / PAGINA_PEDIDOS));
+  const { datos, cargando } = useListado(
+    () => pedidosRepo.listar({ q, estado, estadoPago: pago, page }),
+    [q, estado, pago, page],
+  );
+
+  const lista = datos ?? { rows: [], total: 0 };
+  const paginas = totalPaginas(lista.total, pedidosRepo.pageSize);
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-tinta-tenue">{total} pedido(s)</p>
+      <p className="text-sm text-tinta-tenue">{lista.total} pedido(s)</p>
 
       <form className="recuadro flex flex-wrap gap-3 p-4" method="get">
         <div className="relative min-w-52 flex-1">
@@ -58,8 +60,9 @@ export default async function PedidosPage({
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-tinta-tenue">No hay pedidos.</td></tr>}
-              {rows.map((p) => (
+              {cargando && <FilaCargando cols={6} />}
+              {!cargando && lista.rows.length === 0 && <FilaVacia cols={6} texto="No hay pedidos." />}
+              {!cargando && lista.rows.map((p) => (
                 <tr key={p.id} className="border-b border-black/5 last:border-0">
                   <td className="px-4 py-3 font-semibold text-tinta">{p.numero}</td>
                   <td className="px-4 py-3 text-tinta-suave">{p.nombre_cliente}<br /><span className="text-xs text-tinta-tenue">{p.telefono_cliente}</span></td>
@@ -67,7 +70,7 @@ export default async function PedidosPage({
                   <td className="px-4 py-3"><EstadoBadge estado={p.estado_pago} /></td>
                   <td className="px-4 py-3 font-semibold text-tinta">{formatGs(p.total)}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/pedidos/${p.id}`} className="inline-grid h-9 w-9 place-items-center rounded-lg text-tinta hover:bg-black/5" aria-label="Ver detalle"><Eye size={17} /></Link>
+                    <Link href={`/admin/pedidos/ver/?id=${p.id}`} className="inline-grid h-9 w-9 place-items-center rounded-lg text-tinta hover:bg-black/5" aria-label="Ver detalle"><Eye size={17} /></Link>
                   </td>
                 </tr>
               ))}
@@ -76,20 +79,19 @@ export default async function PedidosPage({
         </div>
       </div>
 
-      {paginas > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          {Array.from({ length: paginas }).map((_, i) => {
-            const n = i + 1;
-            const params = new URLSearchParams({ q, estado, pago, page: String(n) });
-            return (
-              <Link key={n} href={`/admin/pedidos?${params.toString()}`}
-                className={n === page ? "rounded-lg bg-fuego-gradient px-3.5 py-2 text-sm font-bold text-[#1a0e00]" : "rounded-lg border border-black/15 px-3.5 py-2 text-sm font-semibold text-tinta hover:bg-black/5"}>
-                {n}
-              </Link>
-            );
-          })}
-        </div>
-      )}
+      <Paginacion
+        page={page}
+        totalPaginas={paginas}
+        hrefDe={(n) => `/admin/pedidos/?${new URLSearchParams({ q, estado, pago, page: String(n) }).toString()}`}
+      />
     </div>
+  );
+}
+
+export default function PedidosPage() {
+  return (
+    <Suspense fallback={<div className="py-10 text-center text-tinta-tenue">Cargando…</div>}>
+      <PedidosLista />
+    </Suspense>
   );
 }

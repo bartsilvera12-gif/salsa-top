@@ -8,7 +8,7 @@ export function NotaInterna({
   placeholder = "Notas internas (no visibles para el cliente)…",
 }: {
   valorInicial: string;
-  guardar: (nota: string) => Promise<{ ok: true }>;
+  guardar: (nota: string) => Promise<{ ok: true } | { error: string }>;
   placeholder?: string;
 }) {
   const [valor, setValor] = useState(valorInicial);

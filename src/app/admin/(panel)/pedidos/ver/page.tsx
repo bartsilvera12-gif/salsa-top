@@ -1,25 +1,64 @@
-import { notFound } from "next/navigation";
+"use client";
+
+import { Suspense } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { MessageCircle } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { OPERACIONES } from "@/lib/permisos";
-import { getPedidoAdmin } from "@/lib/admin-datos";
 import { formatGs } from "@/lib/utils";
 import { waLink } from "@/lib/whatsapp";
+import { pedidosRepo } from "@/lib/repositorios/pedidos";
 import { EstadoBadge } from "@/components/admin/estado-badge";
 import { NotaInterna } from "@/components/admin/nota-interna";
-import { cambiarEstadoPedido, cambiarEstadoPago, guardarNotaInterna } from "../actions";
-
-export const dynamic = "force-dynamic";
+import { useListado } from "@/components/admin/lista-ui";
+import { useToast } from "@/components/admin/toast";
+import { cambiarEstadoPedido, cambiarEstadoPago, guardarNotaInterna } from "../acciones-cliente";
 
 const FLUJO = ["confirmado", "preparando", "listo", "enviado", "entregado"];
 const PAGOS = ["pendiente", "pagado", "rechazado", "reembolsado"];
 
-export default async function PedidoDetallePage({ params }: { params: Promise<{ id: string }> }) {
-  await requirePerfil(OPERACIONES);
-  const { id } = await params;
-  const p = await getPedidoAdmin(id);
-  if (!p) notFound();
+function PedidoDetalle() {
+  const sp = useSearchParams();
+  const id = sp.get("id");
+  const toast = useToast();
 
+  const { datos, cargando, recargar } = useListado(
+    () => (id ? pedidosRepo.obtenerDetalle(id) : Promise.resolve(null)),
+    [id],
+  );
+
+  async function onEstado(estado: string) {
+    if (!id) return;
+    const r = await cambiarEstadoPedido(id, estado);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(`Estado: ${estado}`);
+      recargar();
+    }
+  }
+
+  async function onPago(estadoPago: string) {
+    if (!id) return;
+    const r = await cambiarEstadoPago(id, estadoPago);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(`Pago: ${estadoPago}`);
+      recargar();
+    }
+  }
+
+  if (cargando && !datos) {
+    return <p className="py-10 text-center text-tinta-tenue">Cargando…</p>;
+  }
+  if (!datos) {
+    return (
+      <div className="recuadro p-10 text-center">
+        <p className="text-tinta-suave">Pedido no encontrado.</p>
+        <Link href="/admin/pedidos/" className="btn-fuego mt-4">Volver a pedidos</Link>
+      </div>
+    );
+  }
+
+  const p = datos;
   const wa = waLink(p.telefono_cliente, `Hola ${p.nombre_cliente}, sobre tu pedido ${p.numero} en Salsa Top:`);
 
   return (
@@ -43,28 +82,23 @@ export default async function PedidoDetallePage({ params }: { params: Promise<{ 
             <h3 className="mb-3 font-title text-sm font-bold uppercase tracking-widest text-acento">Cambiar estado</h3>
             <div className="flex flex-wrap gap-2">
               {FLUJO.map((e) => (
-                <form key={e} action={cambiarEstadoPedido.bind(null, id, e)}>
-                  <button type="submit" disabled={p.estado === e}
-                    className="rounded-lg border border-black/15 px-3 py-2 text-xs font-semibold capitalize text-tinta hover:bg-black/5 disabled:opacity-40">
-                    {e}
-                  </button>
-                </form>
+                <button key={e} type="button" onClick={() => onEstado(e)} disabled={p.estado === e}
+                  className="rounded-lg border border-black/15 px-3 py-2 text-xs font-semibold capitalize text-tinta hover:bg-black/5 disabled:opacity-40">
+                  {e}
+                </button>
               ))}
               {p.estado !== "cancelado" && (
-                <form action={cambiarEstadoPedido.bind(null, id, "cancelado")}>
-                  <button type="submit" className="rounded-lg border border-fuego-rojo/30 px-3 py-2 text-xs font-semibold text-fuego-rojo hover:bg-fuego-rojo/10">Cancelar pedido</button>
-                </form>
+                <button type="button" onClick={() => onEstado("cancelado")}
+                  className="rounded-lg border border-fuego-rojo/30 px-3 py-2 text-xs font-semibold text-fuego-rojo hover:bg-fuego-rojo/10">Cancelar pedido</button>
               )}
             </div>
             <h3 className="mb-3 mt-5 font-title text-sm font-bold uppercase tracking-widest text-acento">Pago</h3>
             <div className="flex flex-wrap gap-2">
               {PAGOS.map((e) => (
-                <form key={e} action={cambiarEstadoPago.bind(null, id, e)}>
-                  <button type="submit" disabled={p.estado_pago === e}
-                    className="rounded-lg border border-black/15 px-3 py-2 text-xs font-semibold capitalize text-tinta hover:bg-black/5 disabled:opacity-40">
-                    {e}
-                  </button>
-                </form>
+                <button key={e} type="button" onClick={() => onPago(e)} disabled={p.estado_pago === e}
+                  className="rounded-lg border border-black/15 px-3 py-2 text-xs font-semibold capitalize text-tinta hover:bg-black/5 disabled:opacity-40">
+                  {e}
+                </button>
               ))}
             </div>
           </div>
@@ -97,7 +131,7 @@ export default async function PedidoDetallePage({ params }: { params: Promise<{ 
           {/* Notas internas */}
           <div className="recuadro p-5">
             <h3 className="mb-3 font-title text-sm font-bold uppercase tracking-widest text-acento">Notas internas</h3>
-            <NotaInterna valorInicial={p.observaciones_internas ?? ""} guardar={guardarNotaInterna.bind(null, id)} />
+            <NotaInterna valorInicial={p.observaciones_internas ?? ""} guardar={(nota) => guardarNotaInterna(id!, nota)} />
           </div>
         </div>
 
@@ -137,5 +171,13 @@ export default async function PedidoDetallePage({ params }: { params: Promise<{ 
         </aside>
       </div>
     </div>
+  );
+}
+
+export default function PedidoDetallePage() {
+  return (
+    <Suspense fallback={<p className="py-10 text-center text-tinta-tenue">Cargando…</p>}>
+      <PedidoDetalle />
+    </Suspense>
   );
 }
