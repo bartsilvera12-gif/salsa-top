@@ -1,9 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Package, PackageCheck, Tags, ShoppingCart, Clock } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
-
-export const dynamic = "force-dynamic";
+import { getSupabase } from "@/lib/supabase/browser";
+import { useSesion } from "@/lib/sesion";
 
 type Conteos = {
   productos: number;
@@ -15,13 +16,14 @@ type Conteos = {
   mensajesNuevos: number;
 };
 
+const VACIO: Conteos = {
+  productos: 0, productosActivos: 0, categorias: 0,
+  pedidosPendientes: 0, pedidosHoy: 0, clientes: 0, mensajesNuevos: 0,
+};
+
 async function obtenerConteos(): Promise<Conteos> {
-  const vacio: Conteos = {
-    productos: 0, productosActivos: 0, categorias: 0,
-    pedidosPendientes: 0, pedidosHoy: 0, clientes: 0, mensajesNuevos: 0,
-  };
   try {
-    const supabase = await createClient();
+    const supabase = getSupabase();
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     const iso = hoy.toISOString();
@@ -49,13 +51,17 @@ async function obtenerConteos(): Promise<Conteos> {
       mensajesNuevos: mensajesNuevos.count ?? 0,
     };
   } catch {
-    return vacio;
+    return VACIO;
   }
 }
 
-export default async function DashboardPage() {
-  const perfil = await requirePerfil();
-  const c = await obtenerConteos();
+export default function DashboardPage() {
+  const { perfil } = useSesion();
+  const [c, setC] = useState<Conteos>(VACIO);
+
+  useEffect(() => {
+    obtenerConteos().then(setC);
+  }, []);
 
   const tarjetas = [
     { label: "Productos", valor: c.productos, sub: `${c.productosActivos} activos`, icono: Package, href: "/admin/productos" },
@@ -69,7 +75,7 @@ export default async function DashboardPage() {
       <div>
         <p className="eyebrow">Panel de administración</p>
         <h2 className="font-title text-3xl font-extrabold uppercase text-tinta">
-          Hola, {perfil.nombre} 👋
+          Hola, {perfil?.nombre} 👋
         </h2>
         <p className="text-sm text-tinta-tenue">Resumen de tu tienda Salsa Top.</p>
       </div>
