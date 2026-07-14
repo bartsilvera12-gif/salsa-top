@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Field, Input, Textarea, Select, Toggle } from "@/components/admin/ui";
-import { guardarCupon } from "@/app/admin/(panel)/cupones/actions";
-import type { CuponRow } from "@/lib/admin-datos";
+import { MensajeError } from "@/components/admin/lista-ui";
+import { guardarCuponCliente } from "@/app/admin/(panel)/cupones/acciones-cliente";
+import type { Cupon } from "@/lib/repositorios/cupones";
 
 type FormValues = {
   codigo: string;
@@ -22,8 +24,9 @@ type FormValues = {
 
 const paraInput = (iso: string | null) => (iso ? iso.slice(0, 16) : "");
 
-export function CuponForm({ cupon }: { cupon: CuponRow | null }) {
+export function CuponForm({ cupon }: { cupon: Cupon | null }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
   const { register, handleSubmit, watch, setValue, formState } = useForm<FormValues>({
     defaultValues: {
       codigo: cupon?.codigo ?? "",
@@ -43,13 +46,17 @@ export function CuponForm({ cupon }: { cupon: CuponRow | null }) {
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
-    const res = await guardarCupon(cupon?.id ?? null, values);
-    if (res && "error" in res) setServerError(res.error);
+    const res = await guardarCuponCliente(cupon?.id ?? null, values);
+    if ("error" in res) {
+      setServerError(res.error);
+      return;
+    }
+    router.push("/admin/cupones/");
   });
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {serverError && <p className="rounded-xl border border-fuego-rojo/30 bg-fuego-rojo/10 px-4 py-3 text-sm font-medium text-fuego-rojo">{serverError}</p>}
+      <MensajeError>{serverError}</MensajeError>
       <div className="recuadro space-y-4 p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Código" htmlFor="codigo" hint="Se guarda en mayúsculas" error={formState.errors.codigo?.message}>
@@ -87,7 +94,7 @@ export function CuponForm({ cupon }: { cupon: CuponRow | null }) {
         </div>
       </div>
       <div className="flex items-center justify-end gap-3">
-        <Link href="/admin/cupones" className="btn-contorno">Cancelar</Link>
+        <Link href="/admin/cupones/" className="btn-contorno">Cancelar</Link>
         <button type="submit" disabled={formState.isSubmitting} className="btn-fuego disabled:opacity-60">
           {formState.isSubmitting ? "Guardando…" : "Guardar cupón"}
         </button>

@@ -1,12 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { ADMIN } from "@/lib/permisos";
-import { getCuponesAdmin } from "@/lib/admin-datos";
+import { cuponesRepo } from "@/lib/repositorios/cupones";
+import { alternarActivoCuponCliente, eliminarCuponCliente } from "./acciones-cliente";
+import { useListado, BotonConfirmar, FilaCargando, FilaVacia } from "@/components/admin/lista-ui";
+import { useToast } from "@/components/admin/toast";
 import { formatGs } from "@/lib/utils";
-import { alternarActivoCupon, eliminarCupon } from "./actions";
-
-export const dynamic = "force-dynamic";
 
 const TIPO_LABEL: Record<string, string> = {
   porcentaje: "Porcentaje",
@@ -14,15 +14,34 @@ const TIPO_LABEL: Record<string, string> = {
   envio_gratis: "Envío gratis",
 };
 
-export default async function CuponesPage() {
-  await requirePerfil(ADMIN);
-  const cupones = await getCuponesAdmin();
+export default function CuponesPage() {
+  const toast = useToast();
+  const { datos, cargando, recargar } = useListado(() => cuponesRepo.listar(), []);
+  const cupones = datos ?? [];
+
+  async function onEliminar(id: string) {
+    const r = await eliminarCuponCliente(id);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito("Cupón eliminado");
+      recargar();
+    }
+  }
+
+  async function onAlternar(id: string, activo: boolean) {
+    const r = await alternarActivoCuponCliente(id, activo);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(activo ? "Cupón activo" : "Cupón inactivo");
+      recargar();
+    }
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-tinta-tenue">{cupones.length} cupón(es)</p>
-        <Link href="/admin/cupones/nuevo" className="btn-fuego"><Plus size={18} /> Nuevo cupón</Link>
+        <Link href="/admin/cupones/nuevo/" className="btn-fuego"><Plus size={18} /> Nuevo cupón</Link>
       </div>
 
       <div className="recuadro overflow-hidden p-0">
@@ -39,8 +58,9 @@ export default async function CuponesPage() {
               </tr>
             </thead>
             <tbody>
-              {cupones.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-tinta-tenue">No hay cupones.</td></tr>}
-              {cupones.map((c) => (
+              {cargando && <FilaCargando cols={6} />}
+              {!cargando && cupones.length === 0 && <FilaVacia cols={6} texto="No hay cupones." />}
+              {!cargando && cupones.map((c) => (
                 <tr key={c.id} className="border-b border-black/5 last:border-0">
                   <td className="px-4 py-3 font-semibold text-tinta">{c.codigo}</td>
                   <td className="px-4 py-3 text-tinta-suave">{TIPO_LABEL[c.tipo_descuento] ?? c.tipo_descuento}</td>
@@ -55,13 +75,11 @@ export default async function CuponesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
-                      <Link href={`/admin/cupones/${c.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar"><Pencil size={16} /></Link>
-                      <form action={alternarActivoCupon.bind(null, c.id, !c.activo)}>
-                        <button type="submit" className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5">{c.activo ? "Desactivar" : "Activar"}</button>
-                      </form>
-                      <form action={eliminarCupon.bind(null, c.id)}>
-                        <button type="submit" className="rounded-lg p-2 text-fuego-rojo hover:bg-fuego-rojo/10" aria-label="Eliminar"><Trash2 size={16} /></button>
-                      </form>
+                      <Link href={`/admin/cupones/editar/?id=${c.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar"><Pencil size={16} /></Link>
+                      <button type="button" onClick={() => onAlternar(c.id, !c.activo)} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5">{c.activo ? "Desactivar" : "Activar"}</button>
+                      <BotonConfirmar mensaje="¿Eliminar este cupón? Esta acción no se puede deshacer." onConfirmar={() => onEliminar(c.id)} ariaLabel="Eliminar cupón">
+                        <Trash2 size={16} />
+                      </BotonConfirmar>
                     </div>
                   </td>
                 </tr>
