@@ -10,7 +10,7 @@ import {
   ShieldCheck, ScrollText, Menu, X, LogOut, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { cerrarSesion } from "@/app/admin/actions";
+import { useSesion } from "@/lib/sesion";
 import type { ItemMenu } from "@/lib/permisos";
 import { ROL_LABEL, type Rol } from "@/lib/permisos";
 
@@ -29,6 +29,7 @@ type Props = {
 export function AdminShell({ items, perfil, children }: Props) {
   const pathname = usePathname();
   const [abierto, setAbierto] = useState(false);
+  const { cerrarSesion } = useSesion();
 
   const activo = items.find(
     (i) => pathname === i.href || (i.href !== "/admin" && pathname.startsWith(i.href)),
@@ -76,14 +77,13 @@ export function AdminShell({ items, perfil, children }: Props) {
           {perfil.nombre} {perfil.apellido ?? ""}
         </p>
         <p className="truncate text-xs text-crema/60">{ROL_LABEL[perfil.rol]}</p>
-        <form action={cerrarSesion} className="mt-3">
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
-          >
-            <LogOut size={16} /> Cerrar sesión
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={() => { void cerrarSesion(); }}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/10"
+        >
+          <LogOut size={16} /> Cerrar sesión
+        </button>
       </div>
     </>
   );
