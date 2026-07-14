@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/public/checkout-form";
 import { getMetodosPago, getMetodosEntrega, getConfiguracion } from "@/lib/datos";
 
-export const dynamic = "force-dynamic";
-
+// Sin force-dynamic: se genera estáticamente en build (output: export).
+// Los datos (métodos de pago/entrega, config) se leen con el cliente público
+// anónimo (sin cookies) y se refrescan en el próximo build/redeploy.
 export const metadata: Metadata = {
   title: "Checkout",
   robots: { index: false, follow: false },
