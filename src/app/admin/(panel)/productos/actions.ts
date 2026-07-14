@@ -70,6 +70,7 @@ export async function guardarProducto(id: string | null, input: unknown): Promis
   }
 
   revalidatePath("/admin/productos");
+  revalidatePath("/"); // refresca la home pública (ISR) para que el cambio se vea al instante
   redirect("/admin/productos");
 }
 
@@ -78,6 +79,15 @@ export async function alternarActivo(id: string, activo: boolean): Promise<void>
   const supabase = await createClient();
   await supabase.from("productos").update({ activo }).eq("id", id);
   revalidatePath("/admin/productos");
+  revalidatePath("/"); // refresca la home pública (ISR) para que el cambio se vea al instante
+}
+
+export async function eliminarProducto(id: string): Promise<void> {
+  await requirePerfil(CONTENIDO);
+  const supabase = await createClient();
+  await supabase.from("productos").delete().eq("id", id);
+  revalidatePath("/admin/productos");
+  revalidatePath("/"); // refresca la home pública (ISR)
 }
 
 export async function duplicarProducto(id: string): Promise<void> {
@@ -98,6 +108,7 @@ export async function duplicarProducto(id: string): Promise<void> {
 
   await supabase.from("productos").insert(copia);
   revalidatePath("/admin/productos");
+  revalidatePath("/"); // refresca la home pública (ISR) para que el cambio se vea al instante
 }
 
 function traducir(msg: string): string {

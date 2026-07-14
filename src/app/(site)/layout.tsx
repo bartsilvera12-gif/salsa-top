@@ -4,7 +4,9 @@ import { SiteFooter } from "@/components/public/site-footer";
 import { getConfiguracion } from "@/lib/datos";
 import { waLink } from "@/lib/whatsapp";
 
-export const dynamic = "force-dynamic";
+// Contenido público (header/footer): se cachea con ISR y se regenera cada 5 min.
+// Antes era force-dynamic, que consultaba Supabase en cada request.
+export const revalidate = 300;
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const config = await getConfiguracion();

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { WHATSAPP_NUMBER } from "@/lib/env";
 
 // ---------------------------------------------------------------------------
@@ -128,7 +128,7 @@ const PRODUCTOS_FALLBACK: Producto[] = [
 // ---------------------------------------------------------------------------
 export async function getConfiguracion(): Promise<Configuracion> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("configuracion_sitio")
       .select("nombre_marca, eslogan, descripcion_corta, whatsapp, telefono, email, instagram_url, facebook_url, tiktok_url")
@@ -143,7 +143,7 @@ export async function getConfiguracion(): Promise<Configuracion> {
 
 export async function getSecciones(): Promise<Record<string, Seccion>> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("secciones_sitio")
       .select("clave, titulo, subtitulo, contenido, texto_boton, enlace_boton")
@@ -159,7 +159,7 @@ export async function getSecciones(): Promise<Record<string, Seccion>> {
 
 export async function getProductos(): Promise<Producto[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("productos")
       .select("id, nombre, slug, descripcion_corta, contenido_neto, precio, precio_oferta, en_oferta, nivel_picante, imagen_principal_url, destacado")
@@ -177,7 +177,7 @@ export type MetodoEntrega = { nombre: string; descripcion: string | null; costo:
 
 export async function getMetodosPago(): Promise<MetodoPago[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("metodos_pago")
       .select("nombre, descripcion, instrucciones")
@@ -192,7 +192,7 @@ export async function getMetodosPago(): Promise<MetodoPago[]> {
 
 export async function getMetodosEntrega(): Promise<MetodoEntrega[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("metodos_entrega")
       .select("nombre, descripcion, costo")
@@ -208,7 +208,7 @@ export async function getMetodosEntrega(): Promise<MetodoEntrega[]> {
 
 export async function getBeneficios(): Promise<Beneficio[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("beneficios")
       .select("id, titulo, descripcion, icono")

@@ -11,8 +11,14 @@ const supabaseHost = (() => {
 
 const nextConfig = {
   reactStrictMode: true,
+  // Oculta el indicador flotante de Next.js Dev Tools (la "N") en desarrollo.
+  devIndicators: false,
   // Coolify usa un servidor Node (output standalone reduce el tamaño de la imagen)
   output: "standalone",
+  // Las imágenes se suben vía Server Action; por defecto Next corta en 1MB.
+  experimental: {
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   images: {
     remotePatterns: [
       // Supabase Storage (host derivado de la env en build)

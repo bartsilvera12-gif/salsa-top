@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, PackageCheck, Tags, ShoppingCart, Clock, Users, Mail } from "lucide-react";
+import { Package, PackageCheck, Tags, ShoppingCart, Clock } from "lucide-react";
 import { requirePerfil } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -62,8 +62,6 @@ export default async function DashboardPage() {
     { label: "Categorías", valor: c.categorias, sub: "en catálogo", icono: Tags, href: "/admin/categorias" },
     { label: "Pedidos pendientes", valor: c.pedidosPendientes, sub: "por confirmar", icono: ShoppingCart, href: "/admin/pedidos" },
     { label: "Pedidos de hoy", valor: c.pedidosHoy, sub: "recibidos hoy", icono: Clock, href: "/admin/pedidos" },
-    { label: "Clientes", valor: c.clientes, sub: "registrados", icono: Users, href: "/admin/clientes" },
-    { label: "Mensajes nuevos", valor: c.mensajesNuevos, sub: "sin leer", icono: Mail, href: "/admin/contenido" },
   ];
 
   return (

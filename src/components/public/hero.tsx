@@ -33,7 +33,7 @@ export function Hero({ hero }: { hero: Seccion }) {
         </h1>
 
         {hero.contenido && (
-          <p className="max-w-2xl text-lg leading-relaxed text-tinta-suave">{hero.contenido}</p>
+          <p className="max-w-2xl text-lg font-medium leading-relaxed text-tinta">{hero.contenido}</p>
         )}
 
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">

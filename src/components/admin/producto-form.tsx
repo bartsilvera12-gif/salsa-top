@@ -129,9 +129,9 @@ export function ProductoForm({
                 className="btn-contorno flex-shrink-0 px-3 py-2 text-xs">Generar</button>
             </div>
           </Field>
-          <Field label="Código" htmlFor="codigo">
-            <Input id="codigo" {...register("codigo")} />
-          </Field>
+          {/* Campo "Código" ocultado a pedido. Se mantiene registrado (input
+              oculto) para no perder el valor de productos que ya lo tengan. */}
+          <input type="hidden" {...register("codigo")} />
           <Field label="Contenido neto" htmlFor="contenido_neto">
             <Input id="contenido_neto" placeholder="30 g" {...register("contenido_neto")} />
           </Field>
@@ -167,7 +167,7 @@ export function ProductoForm({
         </div>
       </Section>
 
-      <Section titulo="Categoría, etiquetas y picante">
+      <Section titulo="Categoría y picante">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Categoría" htmlFor="categoria_id">
             <Select id="categoria_id" {...register("categoria_id")}>
@@ -180,6 +180,9 @@ export function ProductoForm({
               {[0, 1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
             </Select>
           </Field>
+          {/* Selector de "Etiquetas" ocultado a pedido. Se mantiene montado
+              (display:none) para conservar las etiquetas ya asignadas al guardar. */}
+          <div className="hidden">
           <Field label="Etiquetas" className="sm:col-span-2">
             <div className="flex flex-wrap gap-2">
               {etiquetas.map((e) => {
@@ -196,6 +199,7 @@ export function ProductoForm({
               {etiquetas.length === 0 && <p className="text-xs text-tinta-tenue">No hay etiquetas cargadas.</p>}
             </div>
           </Field>
+          </div>
         </div>
       </Section>
 
@@ -229,16 +233,10 @@ export function ProductoForm({
         </div>
       </Section>
 
-      <Section titulo="SEO">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Meta título" htmlFor="meta_titulo">
-            <Input id="meta_titulo" {...register("meta_titulo")} />
-          </Field>
-          <Field label="Meta descripción" htmlFor="meta_descripcion">
-            <Input id="meta_descripcion" {...register("meta_descripcion")} />
-          </Field>
-        </div>
-      </Section>
+      {/* Sección "SEO" eliminada de la vista a pedido. Los campos se mantienen
+          registrados (ocultos) para no perder valores ya guardados. */}
+      <input type="hidden" {...register("meta_titulo")} />
+      <input type="hidden" {...register("meta_descripcion")} />
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-crema/95 px-4 py-3 backdrop-blur lg:pl-[280px]">
         <div className="mx-auto flex max-w-4xl items-center justify-end gap-3">

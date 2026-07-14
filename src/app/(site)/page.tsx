@@ -7,7 +7,8 @@ import { PropuestaSection } from "@/components/public/propuesta-section";
 import { DistribuidoresSection, ContactoSection } from "@/components/public/contacto-section";
 import { getConfiguracion, getSecciones, getProductos, getBeneficios } from "@/lib/datos";
 
-export const dynamic = "force-dynamic";
+// Home pública: ISR: se sirve estática desde caché y se regenera cada 5 min.
+export const revalidate = 300;
 
 export default async function Home() {
   const [config, secciones, productos, beneficios] = await Promise.all([

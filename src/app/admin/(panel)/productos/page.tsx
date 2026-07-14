@@ -1,26 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Search, Copy, Pencil } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { requirePerfil } from "@/lib/auth";
 import { CONTENIDO } from "@/lib/permisos";
-import { getProductosAdmin, PAGINA_PRODUCTOS } from "@/lib/admin-datos";
+import { getProductosAdmin, getCategoriasOpciones, PAGINA_PRODUCTOS } from "@/lib/admin-datos";
 import { formatGs } from "@/lib/utils";
-import { alternarActivo, duplicarProducto } from "./actions";
+import { alternarActivo } from "./actions";
+import { BotonEliminarProducto, ProductosFiltros } from "@/components/admin/producto-lista-controls";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProductosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; estado?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; estado?: string; categoria?: string; page?: string }>;
 }) {
   await requirePerfil(CONTENIDO);
   const sp = await searchParams;
   const q = sp.q ?? "";
   const estado = (sp.estado as "todos" | "activos" | "inactivos") ?? "todos";
+  const categoria = sp.categoria ?? "";
   const page = Number(sp.page ?? "1") || 1;
 
-  const { rows, total } = await getProductosAdmin({ q, estado, page });
+  const [{ rows, total }, categorias] = await Promise.all([
+    getProductosAdmin({ q, estado, categoria, page }),
+    getCategoriasOpciones(),
+  ]);
   const paginas = Math.max(1, Math.ceil(total / PAGINA_PRODUCTOS));
 
   return (
@@ -32,23 +37,7 @@ export default async function ProductosPage({
         </Link>
       </div>
 
-      <form className="recuadro flex flex-wrap gap-3 p-4" method="get">
-        <div className="relative min-w-52 flex-1">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-tinta-tenue" />
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Buscar por nombre…"
-            className="w-full rounded-xl border border-black/15 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-fuego-naranja"
-          />
-        </div>
-        <select name="estado" defaultValue={estado} className="rounded-xl border border-black/15 bg-white px-3 text-sm">
-          <option value="todos">Todos</option>
-          <option value="activos">Activos</option>
-          <option value="inactivos">Inactivos</option>
-        </select>
-        <button type="submit" className="btn-contorno px-5 py-2.5 text-sm">Filtrar</button>
-      </form>
+      <ProductosFiltros categorias={categorias} />
 
       <div className="recuadro overflow-hidden p-0">
         <div className="overflow-x-auto">
@@ -94,11 +83,7 @@ export default async function ProductosPage({
                       <Link href={`/admin/productos/${p.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar">
                         <Pencil size={16} />
                       </Link>
-                      <form action={duplicarProducto.bind(null, p.id)}>
-                        <button type="submit" className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Duplicar">
-                          <Copy size={16} />
-                        </button>
-                      </form>
+                      <BotonEliminarProducto id={p.id} nombre={p.nombre} />
                       <form action={alternarActivo.bind(null, p.id, !p.activo)}>
                         <button type="submit" className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5">
                           {p.activo ? "Desactivar" : "Activar"}
@@ -117,7 +102,7 @@ export default async function ProductosPage({
         <div className="flex items-center justify-center gap-2">
           {Array.from({ length: paginas }).map((_, i) => {
             const n = i + 1;
-            const params = new URLSearchParams({ q, estado, page: String(n) });
+            const params = new URLSearchParams({ q, estado, categoria, page: String(n) });
             return (
               <Link key={n} href={`/admin/productos?${params.toString()}`}
                 className={n === page

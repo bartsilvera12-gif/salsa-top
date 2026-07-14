@@ -9,9 +9,9 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "C:\\Users\\duart\\AppData\\Local\\Temp\\claude\\C--NEURA-Alta-Magia-Daniel-extract\\a5775c74-4b27-41c5-b4c8-9e5293aedc33\\scratchpad\\serve.ps1"
+        "C:\\Users\\duart\\AppData\\Local\\Temp\\claude\\C--NEURA-salsa-top\\f4d2894c-0377-461e-a70a-28148f334a2e\\scratchpad\\serve.ps1"
       ],
-      "port": 8791
+      "port": 3000
     }
   ]
 }

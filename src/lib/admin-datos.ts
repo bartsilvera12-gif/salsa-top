@@ -44,6 +44,7 @@ const PAGE_SIZE = 12;
 export async function getProductosAdmin(opts: {
   q?: string;
   estado?: "todos" | "activos" | "inactivos";
+  categoria?: string;
   page?: number;
 }): Promise<ListaProductos> {
   try {
@@ -62,6 +63,7 @@ export async function getProductosAdmin(opts: {
     if (opts.q) query = query.ilike("nombre", `%${opts.q}%`);
     if (opts.estado === "activos") query = query.eq("activo", true);
     if (opts.estado === "inactivos") query = query.eq("activo", false);
+    if (opts.categoria) query = query.eq("categoria_id", opts.categoria);
 
     const { data, count } = await query;
     const rows = (data ?? []).map((p) => {

@@ -51,7 +51,7 @@ export default function CarritoPage() {
           <h2 className="font-title text-lg font-extrabold uppercase text-tinta">Resumen</h2>
           <div className="mt-4 flex items-center justify-between border-t border-black/10 pt-4">
             <span className="text-tinta-suave">Subtotal</span>
-            <span className="font-title text-xl font-extrabold text-tinta">{formatGs(subtotal)}</span>
+            <span className="font-title text-xl font-extrabold text-tinta">{subtotal > 0 ? formatGs(subtotal) : "A confirmar"}</span>
           </div>
           <p className="mt-1 text-xs text-tinta-tenue">El envío se calcula en el siguiente paso.</p>
           <Link href="/checkout" className="btn-fuego mt-5 w-full">Continuar <ArrowRight size={18} /></Link>

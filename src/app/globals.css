@@ -28,6 +28,47 @@
   h5 {
     @apply font-title;
   }
+
+  /* ----------------------------------------------------------------- */
+  /* Barra de scroll — WebKit/Chromium/Edge/Safari.                    */
+  /* Riel TRANSPARENTE: la píldora de fuego flota sobre el fondo real  */
+  /* de cada sección (crema o petróleo), sin crear una franja opaca    */
+  /* que choque con los bordes de sección.                             */
+  /* Nota: NO se define scrollbar-width/color a nivel global porque en */
+  /* Chromium eso desactiva estas reglas ::-webkit-scrollbar.          */
+  /* ----------------------------------------------------------------- */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    /* Borde transparente + recorte padding-box = píldora fina flotante */
+    /* que deja ver el fondo de la sección a ambos lados.               */
+    border: 3px solid transparent;
+    background: linear-gradient(180deg, #ffd100, #ff8200 55%, #ef3340);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ff8200, #ef3340);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox: no soporta ::-webkit-scrollbar. Se aísla con @supports   */
+  /* para no interferir con el pulgar de gradiente en Chromium.        */
+  @supports (not selector(::-webkit-scrollbar)) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--fuego-naranja) transparent;
+    }
+  }
 }
 
 @layer components {

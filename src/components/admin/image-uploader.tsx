@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { UploadCloud, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { slugify } from "@/lib/utils";
+import { subirImagen } from "@/lib/storage-actions";
 
 export function ImageUploader({
   value,
@@ -36,20 +35,18 @@ export function ImageUploader({
 
     setSubiendo(true);
     try {
-      const supabase = createClient();
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const base = slugify(file.name.replace(/\.[^.]+$/, "")) || "imagen";
-      const path = `${carpeta}/${Date.now()}-${base}.${ext}`;
-      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-      if (upErr) {
-        setError("No se pudo subir la imagen.");
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("bucket", bucket);
+      fd.append("carpeta", carpeta);
+      const res = await subirImagen(fd);
+      if ("error" in res) {
+        setError(res.error || "No se pudo subir la imagen.");
         return;
       }
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-      onChange(data.publicUrl);
+      onChange(res.url);
+    } catch {
+      setError("No se pudo subir la imagen.");
     } finally {
       setSubiendo(false);
       e.target.value = "";

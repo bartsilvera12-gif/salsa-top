@@ -140,9 +140,9 @@ export function CheckoutForm({
           ))}
         </div>
         <div className="mt-4 space-y-1 border-t border-black/10 pt-4 text-sm">
-          <div className="flex justify-between"><span className="text-tinta-suave">Subtotal</span><span>{formatGs(subtotal)}</span></div>
+          <div className="flex justify-between"><span className="text-tinta-suave">Subtotal</span><span>{subtotal > 0 ? formatGs(subtotal) : "A confirmar"}</span></div>
           <div className="flex justify-between"><span className="text-tinta-suave">Envío</span><span>{envio > 0 ? formatGs(envio) : "Gratis"}</span></div>
-          <div className="flex justify-between pt-2 font-title text-lg font-extrabold text-tinta"><span>Total</span><span>{formatGs(total)}</span></div>
+          <div className="flex justify-between pt-2 font-title text-lg font-extrabold text-tinta"><span>Total</span><span>{total > 0 ? formatGs(total) : "A confirmar"}</span></div>
         </div>
         <p className="mt-2 text-xs text-tinta-tenue">El total final se calcula y confirma en el servidor.</p>
         <button type="submit" disabled={formState.isSubmitting} className="btn-fuego mt-5 w-full disabled:opacity-60">
