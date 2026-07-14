@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { slugify } from "@/lib/utils";
 import { Field, Input, Textarea, Select, Toggle } from "@/components/admin/ui";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { MensajeError } from "@/components/admin/lista-ui";
 import { guardarProductoCliente } from "@/app/admin/(panel)/productos/acciones-cliente";
 import type { ProductoRow, Opcion } from "@/lib/admin-datos";
 
@@ -116,11 +117,7 @@ export function ProductoForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-5 pb-24">
-      {serverError && (
-        <p className="rounded-xl border border-fuego-rojo/30 bg-fuego-rojo/10 px-4 py-3 text-sm font-medium text-fuego-rojo">
-          {serverError}
-        </p>
-      )}
+      <MensajeError>{serverError}</MensajeError>
 
       <Section titulo="Información general">
         <div className="grid gap-4 sm:grid-cols-2">

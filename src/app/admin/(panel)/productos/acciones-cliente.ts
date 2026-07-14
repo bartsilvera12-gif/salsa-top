@@ -1,18 +1,12 @@
-// Escrituras de Productos desde el NAVEGADOR (cliente authenticated + RLS).
-// Reemplaza a las Server Actions. La seguridad la hace RLS (admin_all_productos):
-// si el rol no está autorizado, la operación falla y se devuelve el error.
-import { createClient } from "@/lib/supabase/client";
+// Escrituras de Productos usando la infraestructura CRUD compartida + browser client.
+// Seguridad por RLS (admin_all_productos). Sin service_role, sin server actions.
+import { crudProductos } from "@/lib/admin-datos-cliente";
+import { getSupabase } from "@/lib/supabase/browser";
 import { productoSchema } from "@/lib/schemas";
 
 type Resultado = { ok: true } | { error: string };
 
 const nn = (v: string | null | undefined) => (v === "" || v === undefined ? null : v);
-
-function traducir(msg: string): string {
-  if (msg.includes("productos_slug")) return "Ya existe un producto con ese slug.";
-  if (msg.includes("productos_codigo")) return "Ya existe un producto con ese código.";
-  return msg;
-}
 
 export async function guardarProductoCliente(id: string | null, input: unknown): Promise<Resultado> {
   const parsed = productoSchema.safeParse(input);
@@ -20,7 +14,6 @@ export async function guardarProductoCliente(id: string | null, input: unknown):
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
   const d = parsed.data;
-  const supabase = createClient();
 
   const payload = {
     nombre: d.nombre,
@@ -52,16 +45,17 @@ export async function guardarProductoCliente(id: string | null, input: unknown):
 
   let productoId = id;
   if (id) {
-    const { error } = await supabase.from("productos").update(payload).eq("id", id);
-    if (error) return { error: traducir(error.message) };
+    const r = await crudProductos.actualizar(id, payload);
+    if (!r.ok) return { error: r.error };
   } else {
-    const { data, error } = await supabase.from("productos").insert(payload).select("id").single();
-    if (error) return { error: traducir(error.message) };
-    productoId = data.id as string;
+    const r = await crudProductos.insertar(payload);
+    if (!r.ok) return { error: r.error };
+    productoId = r.data.id;
   }
 
-  // Sincronizar etiquetas
+  // Sincronizar etiquetas (tabla puente): borrar y reinsertar.
   if (productoId) {
+    const supabase = getSupabase();
     await supabase.from("producto_etiquetas").delete().eq("producto_id", productoId);
     if (d.etiquetas.length > 0) {
       await supabase
@@ -74,32 +68,26 @@ export async function guardarProductoCliente(id: string | null, input: unknown):
 }
 
 export async function alternarActivoCliente(id: string, activo: boolean): Promise<Resultado> {
-  const supabase = createClient();
-  const { error } = await supabase.from("productos").update({ activo }).eq("id", id);
-  return error ? { error: error.message } : { ok: true };
+  const r = await crudProductos.alternar(id, "activo", activo);
+  return r.ok ? { ok: true } : { error: r.error };
 }
 
 export async function eliminarProductoCliente(id: string): Promise<Resultado> {
-  const supabase = createClient();
-  const { error } = await supabase.from("productos").delete().eq("id", id);
-  return error ? { error: error.message } : { ok: true };
+  const r = await crudProductos.eliminar(id);
+  return r.ok ? { ok: true } : { error: r.error };
 }
 
 export async function duplicarProductoCliente(id: string): Promise<Resultado> {
-  const supabase = createClient();
-  const { data } = await supabase.from("productos").select("*").eq("id", id).single();
-  if (!data) return { error: "Producto no encontrado" };
-
-  const copia = { ...data } as Record<string, unknown>;
-  delete copia.id;
-  delete copia.creado_en;
-  delete copia.actualizado_en;
-  copia.nombre = `${data.nombre} (copia)`;
-  copia.slug = `${data.slug}-copia-${Date.now().toString(36)}`;
-  copia.codigo = null;
-  copia.activo = false;
-  copia.destacado = false;
-
-  const { error } = await supabase.from("productos").insert(copia);
-  return error ? { error: traducir(error.message) } : { ok: true };
+  const r = await crudProductos.duplicar(id, (fila) => {
+    delete fila.id;
+    delete fila.creado_en;
+    delete fila.actualizado_en;
+    fila.nombre = `${String(fila.nombre)} (copia)`;
+    fila.slug = `${String(fila.slug)}-copia-${Date.now().toString(36)}`;
+    fila.codigo = null;
+    fila.activo = false;
+    fila.destacado = false;
+    return fila;
+  });
+  return r.ok ? { ok: true } : { error: r.error };
 }

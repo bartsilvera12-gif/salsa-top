@@ -3,6 +3,7 @@
 import { menuPara } from "@/lib/permisos";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { SesionProvider, useSesion } from "@/lib/sesion";
+import { ToastProvider } from "@/components/admin/toast";
 
 function PanelInterior({ children }: { children: React.ReactNode }) {
   const { perfil, cargando } = useSesion();
@@ -28,8 +29,10 @@ function PanelInterior({ children }: { children: React.ReactNode }) {
 
 export default function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SesionProvider>
-      <PanelInterior>{children}</PanelInterior>
-    </SesionProvider>
+    <ToastProvider>
+      <SesionProvider>
+        <PanelInterior>{children}</PanelInterior>
+      </SesionProvider>
+    </ToastProvider>
   );
 }
