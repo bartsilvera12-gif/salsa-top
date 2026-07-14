@@ -3,29 +3,31 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Search, Trash2, Loader2 } from "lucide-react";
-import { eliminarProducto } from "@/app/admin/(panel)/productos/actions";
 
 type Opcion = { id: string; nombre: string };
 
-/** Botón de eliminar producto con confirmación previa. */
-export function BotonEliminarProducto({ id, nombre }: { id: string; nombre: string }) {
+/** Botón de eliminar producto con confirmación previa. La acción (borrado cliente
+ *  + recarga del listado) la ejecuta el componente padre vía `onConfirmar`. */
+export function BotonEliminarProducto({
+  nombre,
+  onConfirmar,
+}: {
+  nombre: string;
+  onConfirmar: () => void | Promise<void>;
+}) {
   return (
-    <form
-      action={eliminarProducto.bind(null, id)}
-      onSubmit={(e) => {
-        if (!confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) {
-          e.preventDefault();
+    <button
+      type="button"
+      onClick={() => {
+        if (confirm(`¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`)) {
+          void onConfirmar();
         }
       }}
+      className="rounded-lg p-2 text-fuego-rojo hover:bg-fuego-rojo/10"
+      aria-label={`Eliminar ${nombre}`}
     >
-      <button
-        type="submit"
-        className="rounded-lg p-2 text-fuego-rojo hover:bg-fuego-rojo/10"
-        aria-label={`Eliminar ${nombre}`}
-      >
-        <Trash2 size={16} />
-      </button>
-    </form>
+      <Trash2 size={16} />
+    </button>
   );
 }
 

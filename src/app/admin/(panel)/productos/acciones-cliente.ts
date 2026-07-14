@@ -1,25 +1,26 @@
-"use server";
-
-import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
+// Escrituras de Productos desde el NAVEGADOR (cliente authenticated + RLS).
+// Reemplaza a las Server Actions. La seguridad la hace RLS (admin_all_productos):
+// si el rol no está autorizado, la operación falla y se devuelve el error.
+import { createClient } from "@/lib/supabase/client";
 import { productoSchema } from "@/lib/schemas";
 
-type Resultado = { error: string } | void;
+type Resultado = { ok: true } | { error: string };
 
 const nn = (v: string | null | undefined) => (v === "" || v === undefined ? null : v);
 
-export async function guardarProducto(id: string | null, input: unknown): Promise<Resultado> {
-  await requirePerfil(CONTENIDO);
+function traducir(msg: string): string {
+  if (msg.includes("productos_slug")) return "Ya existe un producto con ese slug.";
+  if (msg.includes("productos_codigo")) return "Ya existe un producto con ese código.";
+  return msg;
+}
 
+export async function guardarProductoCliente(id: string | null, input: unknown): Promise<Resultado> {
   const parsed = productoSchema.safeParse(input);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
   }
   const d = parsed.data;
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const payload = {
     nombre: d.nombre,
@@ -69,32 +70,25 @@ export async function guardarProducto(id: string | null, input: unknown): Promis
     }
   }
 
-  revalidatePath("/admin/productos");
-  revalidatePath("/"); // refresca la home pública (ISR) para que el cambio se vea al instante
-  redirect("/admin/productos");
+  return { ok: true };
 }
 
-export async function alternarActivo(id: string, activo: boolean): Promise<void> {
-  await requirePerfil(CONTENIDO);
-  const supabase = await createClient();
-  await supabase.from("productos").update({ activo }).eq("id", id);
-  revalidatePath("/admin/productos");
-  revalidatePath("/"); // refresca la home pública (ISR) para que el cambio se vea al instante
+export async function alternarActivoCliente(id: string, activo: boolean): Promise<Resultado> {
+  const supabase = createClient();
+  const { error } = await supabase.from("productos").update({ activo }).eq("id", id);
+  return error ? { error: error.message } : { ok: true };
 }
 
-export async function eliminarProducto(id: string): Promise<void> {
-  await requirePerfil(CONTENIDO);
-  const supabase = await createClient();
-  await supabase.from("productos").delete().eq("id", id);
-  revalidatePath("/admin/productos");
-  revalidatePath("/"); // refresca la home pública (ISR)
+export async function eliminarProductoCliente(id: string): Promise<Resultado> {
+  const supabase = createClient();
+  const { error } = await supabase.from("productos").delete().eq("id", id);
+  return error ? { error: error.message } : { ok: true };
 }
 
-export async function duplicarProducto(id: string): Promise<void> {
-  await requirePerfil(CONTENIDO);
-  const supabase = await createClient();
+export async function duplicarProductoCliente(id: string): Promise<Resultado> {
+  const supabase = createClient();
   const { data } = await supabase.from("productos").select("*").eq("id", id).single();
-  if (!data) return;
+  if (!data) return { error: "Producto no encontrado" };
 
   const copia = { ...data } as Record<string, unknown>;
   delete copia.id;
@@ -106,13 +100,6 @@ export async function duplicarProducto(id: string): Promise<void> {
   copia.activo = false;
   copia.destacado = false;
 
-  await supabase.from("productos").insert(copia);
-  revalidatePath("/admin/productos");
-  revalidatePath("/"); // refresca la home pública (ISR) para que el cambio se vea al instante
-}
-
-function traducir(msg: string): string {
-  if (msg.includes("productos_slug")) return "Ya existe un producto con ese slug.";
-  if (msg.includes("productos_codigo")) return "Ya existe un producto con ese código.";
-  return msg;
+  const { error } = await supabase.from("productos").insert(copia);
+  return error ? { error: traducir(error.message) } : { ok: true };
 }

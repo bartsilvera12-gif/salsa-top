@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { slugify } from "@/lib/utils";
 import { Field, Input, Textarea, Select, Toggle } from "@/components/admin/ui";
 import { ImageUploader } from "@/components/admin/image-uploader";
-import { guardarProducto } from "@/app/admin/(panel)/productos/actions";
+import { guardarProductoCliente } from "@/app/admin/(panel)/productos/acciones-cliente";
 import type { ProductoRow, Opcion } from "@/lib/admin-datos";
 
 type FormValues = {
@@ -59,6 +60,7 @@ export function ProductoForm({
   etiquetas: Opcion[];
 }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
 
   const { register, handleSubmit, watch, setValue, getValues, formState } = useForm<FormValues>({
     defaultValues: {
@@ -97,8 +99,12 @@ export function ProductoForm({
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     const payload = { ...values, categoria_id: values.categoria_id || null };
-    const res = await guardarProducto(producto?.id ?? null, payload);
-    if (res && "error" in res) setServerError(res.error);
+    const res = await guardarProductoCliente(producto?.id ?? null, payload);
+    if ("error" in res) {
+      setServerError(res.error);
+      return;
+    }
+    router.push("/admin/productos/");
   });
 
   function toggleEtiqueta(id: string) {

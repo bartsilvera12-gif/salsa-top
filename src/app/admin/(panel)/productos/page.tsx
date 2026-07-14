@@ -1,38 +1,61 @@
+"use client";
+
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { Plus, Pencil } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
-import { getProductosAdmin, getCategoriasOpciones, PAGINA_PRODUCTOS } from "@/lib/admin-datos";
 import { formatGs } from "@/lib/utils";
-import { alternarActivo } from "./actions";
+import {
+  getProductosAdminCliente,
+  getCategoriasOpcionesCliente,
+  PAGINA_PRODUCTOS,
+} from "@/lib/admin-datos-cliente";
+import { alternarActivoCliente, eliminarProductoCliente } from "./acciones-cliente";
 import { BotonEliminarProducto, ProductosFiltros } from "@/components/admin/producto-lista-controls";
+import type { ListaProductos, Opcion } from "@/lib/admin-datos";
 
-export const dynamic = "force-dynamic";
+function ProductosLista() {
+  const sp = useSearchParams();
+  const q = sp.get("q") ?? "";
+  const estado = ((sp.get("estado") as "todos" | "activos" | "inactivos") ?? "todos") || "todos";
+  const categoria = sp.get("categoria") ?? "";
+  const page = Number(sp.get("page") ?? "1") || 1;
 
-export default async function ProductosPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; estado?: string; categoria?: string; page?: string }>;
-}) {
-  await requirePerfil(CONTENIDO);
-  const sp = await searchParams;
-  const q = sp.q ?? "";
-  const estado = (sp.estado as "todos" | "activos" | "inactivos") ?? "todos";
-  const categoria = sp.categoria ?? "";
-  const page = Number(sp.page ?? "1") || 1;
+  const [lista, setLista] = useState<ListaProductos>({ rows: [], total: 0 });
+  const [categorias, setCategorias] = useState<Opcion[]>([]);
+  const [cargando, setCargando] = useState(true);
 
-  const [{ rows, total }, categorias] = await Promise.all([
-    getProductosAdmin({ q, estado, categoria, page }),
-    getCategoriasOpciones(),
-  ]);
-  const paginas = Math.max(1, Math.ceil(total / PAGINA_PRODUCTOS));
+  const recargar = useCallback(async () => {
+    setCargando(true);
+    const data = await getProductosAdminCliente({ q, estado, categoria, page });
+    setLista(data);
+    setCargando(false);
+  }, [q, estado, categoria, page]);
+
+  useEffect(() => {
+    recargar();
+  }, [recargar]);
+  useEffect(() => {
+    getCategoriasOpcionesCliente().then(setCategorias);
+  }, []);
+
+  const paginas = Math.max(1, Math.ceil(lista.total / PAGINA_PRODUCTOS));
+
+  async function onEliminar(id: string) {
+    await eliminarProductoCliente(id);
+    recargar();
+  }
+  async function onAlternar(id: string, activo: boolean) {
+    await alternarActivoCliente(id, activo);
+    recargar();
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-tinta-tenue">{total} producto(s)</p>
-        <Link href="/admin/productos/nuevo" className="btn-fuego">
+        <p className="text-sm text-tinta-tenue">{lista.total} producto(s)</p>
+        <Link href="/admin/productos/nuevo/" className="btn-fuego">
           <Plus size={18} /> Nuevo producto
         </Link>
       </div>
@@ -53,10 +76,13 @@ export default async function ProductosPage({
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 && (
+              {cargando && (
+                <tr><td colSpan={6} className="px-4 py-10 text-center text-tinta-tenue">Cargando…</td></tr>
+              )}
+              {!cargando && lista.rows.length === 0 && (
                 <tr><td colSpan={6} className="px-4 py-10 text-center text-tinta-tenue">No hay productos.</td></tr>
               )}
-              {rows.map((p) => (
+              {!cargando && lista.rows.map((p) => (
                 <tr key={p.id} className="border-b border-black/5 last:border-0">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -80,15 +106,17 @@ export default async function ProductosPage({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
-                      <Link href={`/admin/productos/${p.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar">
+                      <Link href={`/admin/productos/editar/?id=${p.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar">
                         <Pencil size={16} />
                       </Link>
-                      <BotonEliminarProducto id={p.id} nombre={p.nombre} />
-                      <form action={alternarActivo.bind(null, p.id, !p.activo)}>
-                        <button type="submit" className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5">
-                          {p.activo ? "Desactivar" : "Activar"}
-                        </button>
-                      </form>
+                      <BotonEliminarProducto nombre={p.nombre} onConfirmar={() => onEliminar(p.id)} />
+                      <button
+                        type="button"
+                        onClick={() => onAlternar(p.id, !p.activo)}
+                        className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-acento hover:bg-black/5"
+                      >
+                        {p.activo ? "Desactivar" : "Activar"}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -104,7 +132,7 @@ export default async function ProductosPage({
             const n = i + 1;
             const params = new URLSearchParams({ q, estado, categoria, page: String(n) });
             return (
-              <Link key={n} href={`/admin/productos?${params.toString()}`}
+              <Link key={n} href={`/admin/productos/?${params.toString()}`}
                 className={n === page
                   ? "rounded-lg bg-fuego-gradient px-3.5 py-2 text-sm font-bold text-[#1a0e00]"
                   : "rounded-lg border border-black/15 px-3.5 py-2 text-sm font-semibold text-tinta hover:bg-black/5"}>
@@ -115,5 +143,13 @@ export default async function ProductosPage({
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductosPage() {
+  return (
+    <Suspense fallback={<div className="py-10 text-center text-tinta-tenue">Cargando…</div>}>
+      <ProductosLista />
+    </Suspense>
   );
 }
