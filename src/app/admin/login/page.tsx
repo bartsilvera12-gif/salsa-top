@@ -1,27 +1,13 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { LoginForm } from "@/components/admin/login-form";
+import { LoginPanel } from "@/components/admin/login-panel";
 
 export const metadata: Metadata = {
   title: "Ingresar al panel",
   robots: { index: false, follow: false },
 };
 
-const MENSAJES: Record<string, string> = {
-  denegado: "Necesitás iniciar sesión con una cuenta autorizada.",
-  sin_permiso: "Tu cuenta no tiene permiso para acceder a esa sección.",
-  inactivo: "Tu cuenta está desactivada. Contactá a un administrador.",
-};
-
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; redirect?: string }>;
-}) {
-  const sp = await searchParams;
-  const aviso = sp.error ? MENSAJES[sp.error] : null;
-  const redirectTo = sp.redirect && sp.redirect.startsWith("/admin") ? sp.redirect : "/admin";
-
+export default function LoginPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-12">
       {/* Fondo de chiles */}
@@ -46,13 +32,7 @@ export default async function LoginPage({
             <p className="mt-1 text-sm text-tinta-tenue">Ingresá con tu cuenta autorizada.</p>
           </div>
 
-          {aviso && (
-            <p className="mb-4 rounded-xl border border-fuego-naranja/40 bg-fuego-amarillo/20 px-4 py-3 text-sm font-medium text-acento">
-              {aviso}
-            </p>
-          )}
-
-          <LoginForm redirectTo={redirectTo} />
+          <LoginPanel />
         </div>
 
         <p className="mt-6 text-center text-xs text-tinta-tenue">
