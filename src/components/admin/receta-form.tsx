@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { slugify } from "@/lib/utils";
 import { Field, Input, Textarea, Toggle } from "@/components/admin/ui";
 import { ImageUploader } from "@/components/admin/image-uploader";
-import { guardarReceta } from "@/app/admin/(panel)/recetas/actions";
-import type { RecetaRow } from "@/lib/admin-datos";
+import { MensajeError } from "@/components/admin/lista-ui";
+import { guardarRecetaCliente } from "@/app/admin/(panel)/recetas/acciones-cliente";
+import type { Receta } from "@/lib/repositorios/recetas";
 
 type FormValues = {
   titulo: string;
@@ -26,8 +28,9 @@ type FormValues = {
   meta_descripcion: string;
 };
 
-export function RecetaForm({ receta }: { receta: RecetaRow | null }) {
+export function RecetaForm({ receta }: { receta: Receta | null }) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
   const { register, handleSubmit, watch, setValue, getValues, formState } = useForm<FormValues>({
     defaultValues: {
       titulo: receta?.titulo ?? "",
@@ -49,13 +52,17 @@ export function RecetaForm({ receta }: { receta: RecetaRow | null }) {
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
-    const res = await guardarReceta(receta?.id ?? null, values);
-    if (res && "error" in res) setServerError(res.error);
+    const res = await guardarRecetaCliente(receta?.id ?? null, values);
+    if ("error" in res) {
+      setServerError(res.error);
+      return;
+    }
+    router.push("/admin/recetas/");
   });
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {serverError && <p className="rounded-xl border border-fuego-rojo/30 bg-fuego-rojo/10 px-4 py-3 text-sm font-medium text-fuego-rojo">{serverError}</p>}
+      <MensajeError>{serverError}</MensajeError>
       <div className="recuadro space-y-4 p-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Título" htmlFor="titulo" error={formState.errors.titulo?.message}>
@@ -85,7 +92,7 @@ export function RecetaForm({ receta }: { receta: RecetaRow | null }) {
         </div>
       </div>
       <div className="flex items-center justify-end gap-3">
-        <Link href="/admin/recetas" className="btn-contorno">Cancelar</Link>
+        <Link href="/admin/recetas/" className="btn-contorno">Cancelar</Link>
         <button type="submit" disabled={formState.isSubmitting} className="btn-fuego disabled:opacity-60">
           {formState.isSubmitting ? "Guardando…" : "Guardar receta"}
         </button>
