@@ -111,11 +111,70 @@ curl -s -o /dev/null -w "%{http_code}\n" \
 > El sitio estático original sigue intacto en GitHub Pages y en la rama
 > `static-legacy` hasta hacer el corte final.
 
-### Alternativa: self-host (Docker / VPS)
+## Despliegue en Hostinger VPS / Cloud (Node)
 
-`next.config.mjs` ya usa `output: "standalone"`. Build con `npm run build` y
-correr `node .next/standalone/server.js` (o `npm run start`) en el puerto `3000`
-con las mismas variables de entorno.
+> ⚠️ **Requiere un plan que ejecute Node.js** (Hostinger **VPS** o **Cloud**).
+> El **hosting compartido de Hostinger NO sirve**: esta app usa Server Actions,
+> middleware y funciones de servidor (auth por cookies, service_role) que
+> necesitan Node. Un export estático rompería el panel, el login y el checkout.
+
+`next.config.mjs` ya usa `output: "standalone"`, así que la app se empaqueta
+sola. Hay dos caminos:
+
+### Camino 1 — Docker (recomendado)
+
+Con el `Dockerfile` incluido:
+
+```bash
+# Build (las NEXT_PUBLIC_* van como build-args porque se hornean en el build)
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://api.neura.com.py \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY> \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://tudominio.com \
+  --build-arg NEXT_PUBLIC_WHATSAPP_NUMBER=595994208200 \
+  -t salsa-top .
+
+# Run (la service_role va en RUNTIME, nunca en el build)
+docker run -d --name salsa-top -p 3000:3000 \
+  -e SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY> \
+  --restart unless-stopped salsa-top
+```
+
+### Camino 2 — Node + PM2 (sin Docker)
+
+```bash
+# En el VPS (Node 20+):
+git clone https://github.com/bartsilvera12-gif/salsa-top.git
+cd salsa-top
+npm ci
+cp .env.example .env.local   # completar las 5 variables (incl. service_role)
+npm run build
+npm i -g pm2
+pm2 start npm --name salsa-top -- start   # corre `next start` en :3000
+pm2 save && pm2 startup
+```
+
+### Reverse proxy + SSL (Nginx)
+
+Apuntá tu dominio al VPS y proxeá el puerto 3000:
+
+```nginx
+server {
+  server_name tudominio.com;
+  location / {
+    proxy_pass http://127.0.0.1:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+Luego `sudo certbot --nginx -d tudominio.com` para el certificado SSL.
+
+> **Recordatorios:** (1) exponer el schema `saltatop` en PostgREST (ver arriba);
+> (2) cargar las 5 variables de entorno; (3) `SUPABASE_SERVICE_ROLE_KEY` solo en
+> el servidor, nunca en el build ni en el navegador.
 
 ## Estructura
 
