@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { UploadCloud, X } from "lucide-react";
-import { subirImagen } from "@/lib/storage-actions";
+import { subirImagenCliente } from "@/lib/storage-cliente";
 
 export function ImageUploader({
   value,
@@ -35,11 +35,7 @@ export function ImageUploader({
 
     setSubiendo(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("bucket", bucket);
-      fd.append("carpeta", carpeta);
-      const res = await subirImagen(fd);
+      const res = await subirImagenCliente(file, bucket, carpeta);
       if ("error" in res) {
         setError(res.error || "No se pudo subir la imagen.");
         return;
