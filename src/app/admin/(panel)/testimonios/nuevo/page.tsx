@@ -1,11 +1,8 @@
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
+"use client";
+
 import { TestimonioForm } from "@/components/admin/testimonio-form";
 
-export const dynamic = "force-dynamic";
-
-export default async function NuevoTestimonioPage() {
-  await requirePerfil(CONTENIDO);
+export default function NuevoTestimonioPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <h2 className="mb-5 font-title text-2xl font-extrabold uppercase text-tinta">Nuevo testimonio</h2>

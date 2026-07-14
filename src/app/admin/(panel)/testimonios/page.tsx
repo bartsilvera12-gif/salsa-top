@@ -1,26 +1,46 @@
+"use client";
+
 import Link from "next/link";
 import { Plus, Pencil, Trash2, Star } from "lucide-react";
-import { requirePerfil } from "@/lib/auth";
-import { CONTENIDO } from "@/lib/permisos";
-import { getTestimoniosAdmin } from "@/lib/admin-datos";
-import { alternarAprobadoTestimonio, eliminarTestimonio } from "./actions";
+import { testimoniosRepo } from "@/lib/repositorios/testimonios";
+import { alternarAprobadoTestimonioCliente, eliminarTestimonioCliente } from "./acciones-cliente";
+import { useListado, BotonConfirmar } from "@/components/admin/lista-ui";
+import { useToast } from "@/components/admin/toast";
 
-export const dynamic = "force-dynamic";
+export default function TestimoniosPage() {
+  const toast = useToast();
+  const { datos, cargando, recargar } = useListado(() => testimoniosRepo.listar(), []);
+  const testimonios = datos ?? [];
 
-export default async function TestimoniosPage() {
-  await requirePerfil(CONTENIDO);
-  const testimonios = await getTestimoniosAdmin();
+  async function onEliminar(id: string) {
+    const r = await eliminarTestimonioCliente(id);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito("Testimonio eliminado");
+      recargar();
+    }
+  }
+
+  async function onAlternar(id: string, aprobado: boolean) {
+    const r = await alternarAprobadoTestimonioCliente(id, aprobado);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(aprobado ? "Testimonio aprobado" : "Testimonio pendiente");
+      recargar();
+    }
+  }
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-tinta-tenue">{testimonios.length} testimonio(s)</p>
-        <Link href="/admin/testimonios/nuevo" className="btn-fuego"><Plus size={18} /> Nuevo testimonio</Link>
+        <Link href="/admin/testimonios/nuevo/" className="btn-fuego"><Plus size={18} /> Nuevo testimonio</Link>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {testimonios.length === 0 && <p className="text-tinta-tenue">No hay testimonios.</p>}
-        {testimonios.map((t) => (
+        {cargando && <p className="text-tinta-tenue">Cargando…</p>}
+        {!cargando && testimonios.length === 0 && <p className="text-tinta-tenue">No hay testimonios.</p>}
+        {!cargando && testimonios.map((t) => (
           <div key={t.id} className="recuadro p-5">
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -40,15 +60,13 @@ export default async function TestimoniosPage() {
             </div>
             <p className="mt-2 line-clamp-3 text-sm text-tinta-suave">“{t.comentario}”</p>
             <div className="mt-4 flex items-center gap-1.5">
-              <Link href={`/admin/testimonios/${t.id}`} className="btn-contorno px-4 py-2 text-xs"><Pencil size={14} /> Editar</Link>
-              <form action={alternarAprobadoTestimonio.bind(null, t.id, !t.aprobado)}>
-                <button type="submit" className="rounded-lg px-3 py-2 text-xs font-semibold text-acento hover:bg-black/5">
-                  {t.aprobado ? "Quitar" : "Aprobar"}
-                </button>
-              </form>
-              <form action={eliminarTestimonio.bind(null, t.id)}>
-                <button type="submit" className="rounded-lg p-2 text-fuego-rojo hover:bg-fuego-rojo/10" aria-label="Eliminar"><Trash2 size={15} /></button>
-              </form>
+              <Link href={`/admin/testimonios/editar/?id=${t.id}`} className="btn-contorno px-4 py-2 text-xs"><Pencil size={14} /> Editar</Link>
+              <button type="button" onClick={() => onAlternar(t.id, !t.aprobado)} className="rounded-lg px-3 py-2 text-xs font-semibold text-acento hover:bg-black/5">
+                {t.aprobado ? "Quitar" : "Aprobar"}
+              </button>
+              <BotonConfirmar mensaje={`¿Eliminar este testimonio? Esta acción no se puede deshacer.`} onConfirmar={() => onEliminar(t.id)} ariaLabel="Eliminar testimonio">
+                <Trash2 size={15} />
+              </BotonConfirmar>
             </div>
           </div>
         ))}
