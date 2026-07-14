@@ -1,9 +1,11 @@
-import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { formatGs } from "@/lib/utils";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { CheckCircle2 } from "lucide-react";
+import { getSupabase } from "@/lib/supabase/browser";
+import { formatGs } from "@/lib/utils";
 
 type Pedido = {
   numero: string;
@@ -18,28 +20,22 @@ type Pedido = {
 };
 type Item = { nombre_producto: string; descripcion_variante: string | null; cantidad: number; subtotal: number };
 
-async function getPedido(numero: string): Promise<{ pedido: Pedido; items: Item[] } | null> {
-  try {
-    const supabase = createAdminClient();
-    const { data: pedido } = await supabase
-      .from("pedidos")
-      .select("id, numero, nombre_cliente, estado, metodo_entrega, metodo_pago, subtotal, costo_envio, descuento, total")
-      .eq("numero", numero)
-      .maybeSingle();
-    if (!pedido) return null;
-    const { data: items } = await supabase
-      .from("pedido_items")
-      .select("nombre_producto, descripcion_variante, cantidad, subtotal")
-      .eq("pedido_id", pedido.id);
-    return { pedido: pedido as Pedido, items: (items as Item[]) ?? [] };
-  } catch {
-    return null;
-  }
-}
+function PedidoInterior() {
+  const sp = useSearchParams();
+  const numero = sp.get("numero") ?? "";
+  const [data, setData] = useState<{ pedido: Pedido; items: Item[] } | null>(null);
 
-export default async function PedidoPage({ params }: { params: Promise<{ numero: string }> }) {
-  const { numero } = await params;
-  const data = await getPedido(numero);
+  useEffect(() => {
+    if (!numero) return;
+    // Lectura pública por número (token no adivinable) vía RPC SECURITY DEFINER.
+    // Sin service_role: el cliente browser anónimo llama saltatop.obtener_pedido_publico.
+    getSupabase()
+      .rpc("obtener_pedido_publico", { p_numero: numero })
+      .then(({ data: d }) => {
+        const r = d as { pedido: Pedido; items: Item[] } | null;
+        if (r && r.pedido) setData(r);
+      });
+  }, [numero]);
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-20">
@@ -73,5 +69,13 @@ export default async function PedidoPage({ params }: { params: Promise<{ numero:
         <Link href="/#productos" className="btn-fuego mt-7">Seguir comprando</Link>
       </div>
     </main>
+  );
+}
+
+export default function PedidoPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto max-w-2xl px-6 py-20" />}>
+      <PedidoInterior />
+    </Suspense>
   );
 }

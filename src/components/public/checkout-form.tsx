@@ -78,7 +78,7 @@ export function CheckoutForm({
     const msg = `Hola Salsa Top! Hice el pedido ${res.numero}.\n\n${lineas}\n\nTotal: ${formatGs(res.total)}\nNombre: ${v.nombre} ${v.apellido}\nEntrega: ${v.metodoEntrega}`;
     try { window.open(waLink(whatsapp, msg), "_blank"); } catch { /* noop */ }
     vaciar();
-    router.push(`/pedido/${res.numero}`);
+    router.push(`/pedido/?numero=${res.numero}`);
   });
 
   if (cargado && items.length === 0) {
