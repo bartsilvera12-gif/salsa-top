@@ -1,10 +1,12 @@
 import { Hero } from "@/components/public/hero";
+import { AcercaSection } from "@/components/public/acerca-section";
 import { NosotrosSection } from "@/components/public/nosotros-section";
 import { ProductosSection } from "@/components/public/productos-section";
 import { BeneficiosSection } from "@/components/public/beneficios-section";
 import { ProcesoSection } from "@/components/public/proceso-section";
+import { NuestrosTrabajosSection } from "@/components/public/nuestros-trabajos-section";
 import { PropuestaSection } from "@/components/public/propuesta-section";
-import { DistribuidoresSection, ContactoSection } from "@/components/public/contacto-section";
+import { ContactoSection } from "@/components/public/contacto-section";
 import { getConfiguracion, getSecciones, getProductos, getBeneficios } from "@/lib/datos";
 
 // Home pública: ISR: se sirve estática desde caché y se regenera cada 5 min.
@@ -21,12 +23,15 @@ export default async function Home() {
   return (
     <main>
       <Hero hero={secciones.hero} />
-      <NosotrosSection historia={secciones.historia} />
-      <ProductosSection productos={productos} />
-      <BeneficiosSection beneficios={beneficios} />
-      <ProcesoSection proceso={secciones.proceso} />
+      <NosotrosSection />
       <PropuestaSection propuesta={secciones.propuesta} />
-      <DistribuidoresSection config={config} />
+      <ProductosSection productos={productos} />
+      <AcercaSection incluir={["Beneficios"]} />
+      <BeneficiosSection beneficios={beneficios} />
+      <AcercaSection incluir={["Competencia de la marca"]} />
+      <ProcesoSection proceso={secciones.proceso} historia={secciones.historia} />
+      <NuestrosTrabajosSection limite={4} />
+      <AcercaSection incluir={["¿A quién impactamos?"]} />
       <ContactoSection config={config} contacto={secciones.contacto} />
     </main>
   );

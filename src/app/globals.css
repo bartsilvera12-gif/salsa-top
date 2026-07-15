@@ -82,19 +82,99 @@
     @apply rounded-3xl border border-black/10 bg-crema shadow-recuadro;
   }
 
-  /* Borde con degradado de fuego (fondo crema) — técnica padding-box/border-box */
-  .borde-fuego {
-    border: 2px solid transparent;
-    background:
-      linear-gradient(#fff4ea, #fff4ea) padding-box,
-      linear-gradient(120deg, #ffd100, #ff8200 55%, #ef3340) border-box;
-  }
-  /* Borde de fuego con relleno blanco */
+  /* ---------------------------------------------------------------------------
+     Spotlight-card (adaptación del componente): el borde del recuadro brilla en
+     la zona más cercana al cursor y lo sigue por toda la página. El tono cambia
+     con la posición horizontal del cursor (--xp) → distintos colores. `::before`
+     es el resplandor de color; `::after` es el núcleo blanco brillante. Ambos se
+     recortan al anillo del borde y usan `background-attachment: fixed` para
+     alinearse al cursor real. Se aplica a `.recuadro`, `.glow-fuego` y header.
+     --------------------------------------------------------------------------- */
+  .recuadro,
+  .glow-fuego,
+  .borde-fuego,
   .borde-fuego-blanco {
-    border: 2px solid transparent;
-    background:
-      linear-gradient(#ffffff, #ffffff) padding-box,
-      linear-gradient(120deg, #ffd100, #ff8200 55%, #ef3340) border-box;
+    position: relative;
+    /* Tono dentro de la paleta de marca: rojo (3) → naranja → amarillo (49). */
+    --glow-hue: calc(3 + var(--xp, 0) * 46);
+    /* Rango medio: el resplandor ilumina solo la zona alrededor del cursor,
+       sin cubrir todo el recuadro. */
+    --glow-size: 340px;
+  }
+  .recuadro::before,
+  .glow-fuego::before,
+  .borde-fuego::before,
+  .borde-fuego-blanco::before,
+  .recuadro::after,
+  .glow-fuego::after,
+  .borde-fuego::after,
+  .borde-fuego-blanco::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    padding: 6px; /* grosor del borde de color (más grueso) */
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0; /* aparece solo al pasar el cursor por el recuadro */
+    transition: opacity 0.25s ease;
+    background-repeat: no-repeat;
+    /* Recorta el degradado dejando solo el anillo del borde. */
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  /* Resplandor de color que sigue al cursor; el tono cambia con la posición
+     horizontal (--xp), así los colores "se mueven" con el mouse. */
+  .recuadro::before,
+  .glow-fuego::before,
+  .borde-fuego::before,
+  .borde-fuego-blanco::before {
+    background-image: radial-gradient(
+      var(--glow-size) var(--glow-size) at
+        calc(var(--lx, -9999) * 1px) calc(var(--ly, -9999) * 1px),
+      hsl(var(--glow-hue) 100% 55%) 0%,
+      hsl(var(--glow-hue) 100% 50%) 32%,
+      transparent 78%
+    );
+    filter: brightness(2.4) saturate(1.4);
+  }
+  /* Núcleo blanco brillante en el punto del cursor. */
+  .recuadro::after,
+  .glow-fuego::after,
+  .borde-fuego::after,
+  .borde-fuego-blanco::after {
+    background-image: radial-gradient(
+      200px 200px at
+        calc(var(--lx, -9999) * 1px) calc(var(--ly, -9999) * 1px),
+      hsl(0 0% 100%),
+      transparent 100%
+    );
+  }
+  /* Aparece por separado, solo en el recuadro que el cursor está tocando. */
+  .recuadro:hover::before,
+  .glow-fuego:hover::before,
+  .borde-fuego:hover::before,
+  .borde-fuego-blanco:hover::before,
+  .recuadro:hover::after,
+  .glow-fuego:hover::after,
+  .borde-fuego:hover::after,
+  .borde-fuego-blanco:hover::after {
+    opacity: 1;
+  }
+
+  /* Cajas del header: relleno liso, sin borde de color fijo. El borde de fuego
+     solo aparece con el spotlight que sigue al cursor (.borde-fuego::before). */
+  .borde-fuego {
+    background: #fff4ea;
+  }
+  .borde-fuego-blanco {
+    background: #ffffff;
   }
 
   /* Botón principal (gradiente de fuego) */

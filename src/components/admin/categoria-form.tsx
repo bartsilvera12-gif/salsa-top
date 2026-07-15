@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { slugify } from "@/lib/utils";
 import { Field, Input, Textarea, Toggle } from "@/components/admin/ui";
-import { ImageUploader } from "@/components/admin/image-uploader";
 import { MensajeError } from "@/components/admin/lista-ui";
 import { guardarCategoriaCliente } from "@/app/admin/(panel)/categorias/acciones-cliente";
 import type { Categoria } from "@/lib/repositorios/categorias";
@@ -67,16 +66,11 @@ export function CategoriaForm({ categoria }: { categoria: Categoria | null }) {
           <Field label="Descripción" className="sm:col-span-2" htmlFor="descripcion">
             <Textarea id="descripcion" {...register("descripcion")} />
           </Field>
-          <Field label="Color (hex)" htmlFor="color" hint="Ej: #FF8200">
-            <Input id="color" placeholder="#FF8200" {...register("color")} />
-          </Field>
+          <input type="hidden" {...register("color")} />
           <Field label="Orden" htmlFor="orden">
             <Input id="orden" type="number" {...register("orden", { valueAsNumber: true })} />
           </Field>
-          <Field label="Imagen" className="sm:col-span-2">
-            <ImageUploader value={watch("imagen_url") || null}
-              onChange={(url) => setValue("imagen_url", url ?? "")} bucket="saltatop-contenido" carpeta="categorias" />
-          </Field>
+          <input type="hidden" {...register("imagen_url")} />
           <Toggle label="Activa" descripcion="Visible en la tienda" checked={watch("activa")} onChange={(v) => setValue("activa", v)} />
         </div>
       </div>

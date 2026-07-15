@@ -136,40 +136,23 @@ export function ProductoForm({
           {/* Campo "Código" ocultado a pedido. Se mantiene registrado (input
               oculto) para no perder el valor de productos que ya lo tengan. */}
           <input type="hidden" {...register("codigo")} />
-          <Field label="Contenido neto" htmlFor="contenido_neto">
-            <Input id="contenido_neto" placeholder="30 g" {...register("contenido_neto")} />
-          </Field>
+          <input type="hidden" {...register("contenido_neto")} />
           <Field label="Descripción corta" className="sm:col-span-2" htmlFor="descripcion_corta">
             <Textarea id="descripcion_corta" {...register("descripcion_corta")} />
           </Field>
-          <Field label="Descripción larga" className="sm:col-span-2" htmlFor="descripcion_larga">
-            <Textarea id="descripcion_larga" {...register("descripcion_larga")} />
-          </Field>
+          <input type="hidden" {...register("descripcion_larga")} />
         </div>
       </Section>
 
-      <Section titulo="Precio y stock">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Precio (Gs.)" htmlFor="precio" error={formState.errors.precio?.message}>
-            <Input id="precio" type="number" min={0} {...register("precio", { valueAsNumber: true, min: 0 })} />
-          </Field>
-          <Field label="Precio oferta (Gs.)" htmlFor="precio_oferta">
-            <Input id="precio_oferta" type="number" min={0} {...register("precio_oferta")} />
-          </Field>
-          <Field label="Costo (Gs.)" htmlFor="costo">
-            <Input id="costo" type="number" min={0} {...register("costo")} />
-          </Field>
-          <Field label="Stock" htmlFor="stock">
-            <Input id="stock" type="number" min={0} {...register("stock", { valueAsNumber: true, min: 0 })} />
-          </Field>
-          <Field label="Stock mínimo" htmlFor="stock_minimo">
-            <Input id="stock_minimo" type="number" min={0} {...register("stock_minimo", { valueAsNumber: true, min: 0 })} />
-          </Field>
-          <div className="flex items-end">
-            <Toggle label="Controlar stock" checked={watch("controla_stock")} onChange={(v) => setValue("controla_stock", v)} />
-          </div>
-        </div>
-      </Section>
+      {/* Sección "Precio y stock" oculta: los campos siguen registrados (para no
+          alterar los valores guardados), pero no se muestran en el formulario. */}
+      <div className="hidden" aria-hidden>
+        <input type="number" {...register("precio", { valueAsNumber: true, min: 0 })} />
+        <input type="number" {...register("precio_oferta")} />
+        <input type="number" {...register("costo")} />
+        <input type="number" {...register("stock", { valueAsNumber: true, min: 0 })} />
+        <input type="number" {...register("stock_minimo", { valueAsNumber: true, min: 0 })} />
+      </div>
 
       <Section titulo="Categoría y picante">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -207,19 +190,13 @@ export function ProductoForm({
         </div>
       </Section>
 
-      <Section titulo="Ingredientes y presentación">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Ingredientes" htmlFor="ingredientes">
-            <Textarea id="ingredientes" {...register("ingredientes")} />
-          </Field>
-          <Field label="Recomendaciones de uso" htmlFor="recomendaciones_uso">
-            <Textarea id="recomendaciones_uso" {...register("recomendaciones_uso")} />
-          </Field>
-          <Field label="Presentación" htmlFor="presentacion">
-            <Input id="presentacion" placeholder="Sachet" {...register("presentacion")} />
-          </Field>
-        </div>
-      </Section>
+      {/* Sección "Ingredientes y presentación" oculta: los campos siguen
+          registrados (para no alterar lo guardado), pero no se muestran. */}
+      <div className="hidden" aria-hidden>
+        <input type="text" {...register("ingredientes")} />
+        <input type="text" {...register("recomendaciones_uso")} />
+        <input type="text" {...register("presentacion")} />
+      </div>
 
       <Section titulo="Imagen principal">
         <ImageUploader value={imagen || null} onChange={(url) => setValue("imagen_principal_url", url ?? "")} />
@@ -230,7 +207,6 @@ export function ProductoForm({
           <Toggle label="Activo" descripcion="Visible en la tienda" checked={watch("activo")} onChange={(v) => setValue("activo", v)} />
           <Toggle label="Destacado" descripcion="Aparece en la home" checked={watch("destacado")} onChange={(v) => setValue("destacado", v)} />
           <Toggle label="Nuevo" checked={watch("nuevo")} onChange={(v) => setValue("nuevo", v)} />
-          <Toggle label="En oferta" descripcion="Usa el precio de oferta" checked={watch("en_oferta")} onChange={(v) => setValue("en_oferta", v)} />
           <Field label="Orden" htmlFor="orden">
             <Input id="orden" type="number" {...register("orden", { valueAsNumber: true })} />
           </Field>

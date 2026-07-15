@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { CarritoProvider } from "@/lib/carrito";
+import { SpotlightTracker } from "@/components/spotlight-tracker";
 
 const barlow = Barlow({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable}`}>
       <body>
+        <SpotlightTracker />
         <CarritoProvider>{children}</CarritoProvider>
       </body>
     </html>

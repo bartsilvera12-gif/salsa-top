@@ -2,24 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCarrito } from "@/lib/carrito";
-
-function CarritoLink() {
-  const { cantidadTotal } = useCarrito();
-  return (
-    <Link href="/carrito" className="relative grid h-10 w-10 place-items-center rounded-xl text-tinta hover:bg-white/60" aria-label="Carrito">
-      <ShoppingCart size={20} />
-      {cantidadTotal > 0 && (
-        <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-fuego-rojo px-1 text-[11px] font-bold text-white">
-          {cantidadTotal}
-        </span>
-      )}
-    </Link>
-  );
-}
+import { WhatsappIcon } from "@/components/public/whatsapp-icon";
 
 const LINKS = [
   { label: "Nosotros", href: "#nosotros" },
@@ -33,14 +18,11 @@ export function SiteHeader({ whatsappUrl }: { whatsappUrl: string }) {
   const [abierto, setAbierto] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 px-4 pt-3">
+    <header className="relative z-50 px-4 pt-3">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4">
         {/* Recuadro del logo */}
-        <a href="#top" className="borde-fuego-blanco flex flex-shrink-0 items-center rounded-2xl px-4 py-2 shadow-recuadro-fuerte">
-          <Image src="/logo-icono.png" alt="Salsa Top" width={30} height={30} priority />
-          <span className="ml-2 font-title text-xl font-extrabold uppercase tracking-tight text-tinta">
-            Salsa Top
-          </span>
+        <a href="#top" className="borde-fuego-blanco flex flex-shrink-0 items-center rounded-2xl px-5 py-2.5 shadow-recuadro-fuerte">
+          <Image src="/logo-salsatop.png" alt="Salsa Top" width={1600} height={363} className="h-7 w-auto" priority />
         </a>
 
         {/* Recuadro del menú (desktop) */}
@@ -50,17 +32,13 @@ export function SiteHeader({ whatsappUrl }: { whatsappUrl: string }) {
               {l.label}
             </a>
           ))}
-          <CarritoLink />
           <a href={whatsappUrl} target="_blank" rel="noopener" className="btn-fuego px-5 py-2.5 text-[15px]">
-            WhatsApp
+            <WhatsappIcon className="h-4 w-4" /> WhatsApp
           </a>
         </nav>
 
-        {/* Carrito + botón móvil */}
+        {/* Botón móvil */}
         <div className="flex items-center gap-2 lg:hidden">
-          <div className="borde-fuego rounded-xl px-1 shadow-recuadro-fuerte">
-            <CarritoLink />
-          </div>
           <button
             type="button"
             onClick={() => setAbierto((v) => !v)}
@@ -92,7 +70,7 @@ export function SiteHeader({ whatsappUrl }: { whatsappUrl: string }) {
             </a>
           ))}
           <a href={whatsappUrl} target="_blank" rel="noopener" className="btn-fuego mt-1 w-full">
-            WhatsApp
+            <WhatsappIcon className="h-4 w-4" /> WhatsApp
           </a>
         </nav>
       </div>

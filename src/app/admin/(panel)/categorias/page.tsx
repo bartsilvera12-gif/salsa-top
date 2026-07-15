@@ -86,15 +86,13 @@ export default function CategoriasPage() {
                         >
                           {c.activa ? "Desactivar" : "Activar"}
                         </button>
-                        {c.productos === 0 && (
-                          <BotonConfirmar
-                            mensaje={`¿Eliminar "${c.nombre}"? Esta acción no se puede deshacer.`}
-                            onConfirmar={() => onEliminar(c.id, c.nombre)}
-                            ariaLabel={`Eliminar ${c.nombre}`}
-                          >
-                            <Trash2 size={16} />
-                          </BotonConfirmar>
-                        )}
+                        <BotonConfirmar
+                          mensaje={`¿Eliminar "${c.nombre}"? Esta acción no se puede deshacer.`}
+                          onConfirmar={() => onEliminar(c.id, c.nombre)}
+                          ariaLabel={`Eliminar ${c.nombre}`}
+                        >
+                          <Trash2 size={16} />
+                        </BotonConfirmar>
                       </div>
                     </td>
                   </tr>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Package, PackageCheck, Tags, ShoppingCart, Clock } from "lucide-react";
+import { Package, Tags } from "lucide-react";
 import { getSupabase } from "@/lib/supabase/browser";
 import { useSesion } from "@/lib/sesion";
 
@@ -10,45 +10,23 @@ type Conteos = {
   productos: number;
   productosActivos: number;
   categorias: number;
-  pedidosPendientes: number;
-  pedidosHoy: number;
-  clientes: number;
-  mensajesNuevos: number;
 };
 
-const VACIO: Conteos = {
-  productos: 0, productosActivos: 0, categorias: 0,
-  pedidosPendientes: 0, pedidosHoy: 0, clientes: 0, mensajesNuevos: 0,
-};
+const VACIO: Conteos = { productos: 0, productosActivos: 0, categorias: 0 };
 
 async function obtenerConteos(): Promise<Conteos> {
   try {
     const supabase = getSupabase();
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-    const iso = hoy.toISOString();
-
-    const [
-      productos, productosActivos, categorias,
-      pedidosPendientes, pedidosHoy, clientes, mensajesNuevos,
-    ] = await Promise.all([
+    const [productos, productosActivos, categorias] = await Promise.all([
       supabase.from("productos").select("*", { count: "exact", head: true }),
       supabase.from("productos").select("*", { count: "exact", head: true }).eq("activo", true),
       supabase.from("categorias").select("*", { count: "exact", head: true }),
-      supabase.from("pedidos").select("*", { count: "exact", head: true }).eq("estado", "pendiente"),
-      supabase.from("pedidos").select("*", { count: "exact", head: true }).gte("creado_en", iso),
-      supabase.from("clientes").select("*", { count: "exact", head: true }),
-      supabase.from("mensajes_contacto").select("*", { count: "exact", head: true }).eq("estado", "nuevo"),
     ]);
 
     return {
       productos: productos.count ?? 0,
       productosActivos: productosActivos.count ?? 0,
       categorias: categorias.count ?? 0,
-      pedidosPendientes: pedidosPendientes.count ?? 0,
-      pedidosHoy: pedidosHoy.count ?? 0,
-      clientes: clientes.count ?? 0,
-      mensajesNuevos: mensajesNuevos.count ?? 0,
     };
   } catch {
     return VACIO;
@@ -66,8 +44,6 @@ export default function DashboardPage() {
   const tarjetas = [
     { label: "Productos", valor: c.productos, sub: `${c.productosActivos} activos`, icono: Package, href: "/admin/productos" },
     { label: "Categorías", valor: c.categorias, sub: "en catálogo", icono: Tags, href: "/admin/categorias" },
-    { label: "Pedidos pendientes", valor: c.pedidosPendientes, sub: "por confirmar", icono: ShoppingCart, href: "/admin/pedidos" },
-    { label: "Pedidos de hoy", valor: c.pedidosHoy, sub: "recibidos hoy", icono: Clock, href: "/admin/pedidos" },
   ];
 
   return (
@@ -98,14 +74,6 @@ export default function DashboardPage() {
             </Link>
           );
         })}
-      </div>
-
-      <div className="recuadro flex items-center gap-3 p-5">
-        <PackageCheck className="text-acento" />
-        <p className="text-sm text-tinta-suave">
-          Los módulos de gestión (productos, pedidos, contenido, etc.) se van habilitando por fases.
-          El catálogo inicial ya está cargado en la base.
-        </p>
       </div>
     </div>
   );

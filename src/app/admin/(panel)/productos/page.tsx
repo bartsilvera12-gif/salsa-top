@@ -125,13 +125,6 @@ function ProductosLista() {
                         <Link href={`/admin/productos/editar/?id=${p.id}`} className="rounded-lg p-2 text-tinta hover:bg-black/5" aria-label="Editar">
                           <Pencil size={16} />
                         </Link>
-                        <BotonConfirmar
-                          mensaje={`¿Eliminar "${p.nombre}"? Esta acción no se puede deshacer.`}
-                          onConfirmar={() => onEliminar(p.id, p.nombre)}
-                          ariaLabel={`Eliminar ${p.nombre}`}
-                        >
-                          <Trash2 size={16} />
-                        </BotonConfirmar>
                         <button
                           type="button"
                           onClick={() => onAlternar(p.id, !p.activo)}
@@ -139,6 +132,13 @@ function ProductosLista() {
                         >
                           {p.activo ? "Desactivar" : "Activar"}
                         </button>
+                        <BotonConfirmar
+                          mensaje={`¿Eliminar "${p.nombre}"? Esta acción no se puede deshacer.`}
+                          onConfirmar={() => onEliminar(p.id, p.nombre)}
+                          ariaLabel={`Eliminar ${p.nombre}`}
+                        >
+                          <Trash2 size={16} />
+                        </BotonConfirmar>
                       </div>
                     </td>
                   </tr>

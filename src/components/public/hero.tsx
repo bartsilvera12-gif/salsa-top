@@ -21,11 +21,15 @@ export function Hero({ hero }: { hero: Seccion }) {
       <div className="relative mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
         {hero.subtitulo && <p className="eyebrow">{hero.subtitulo}</p>}
 
-        <div className="recuadro w-full max-w-2xl bg-white px-8 py-8 shadow-recuadro-fuerte sm:px-12">
-          <Image src="/logo-icono.png" alt="Salsa Top" width={72} height={72} className="mx-auto" priority />
-          <p className="mt-3 font-title text-3xl font-extrabold uppercase tracking-tight text-tinta sm:text-4xl">
-            Salsa Top
-          </p>
+        <div className="recuadro w-full max-w-xl bg-white px-10 py-12 shadow-recuadro-fuerte">
+          <Image
+            src="/logo-salsatop.png"
+            alt="Salsa Top"
+            width={1600}
+            height={363}
+            className="mx-auto h-auto w-full max-w-[420px]"
+            priority
+          />
         </div>
 
         <h1 className="max-w-[16ch] font-title text-4xl font-extrabold uppercase leading-none text-tinta sm:text-6xl">

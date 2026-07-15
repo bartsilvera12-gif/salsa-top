@@ -1,10 +1,15 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Flame } from "lucide-react";
 import type { Producto } from "@/lib/datos";
+import { createPublicClient } from "@/lib/supabase/public";
 import { formatGs } from "@/lib/utils";
-import { GlowCard } from "@/components/public/glow-card";
 import { Reveal } from "@/components/public/reveal";
-import { AddToCart } from "@/components/public/add-to-cart";
+
+const CAMPOS =
+  "id, nombre, slug, descripcion_corta, contenido_neto, precio, precio_oferta, en_oferta, nivel_picante, imagen_principal_url, destacado";
 
 function Picante({ nivel }: { nivel: number }) {
   if (!nivel) return null;
@@ -25,7 +30,7 @@ function Picante({ nivel }: { nivel: number }) {
 function ProductCard({ p }: { p: Producto }) {
   const precio = p.en_oferta && p.precio_oferta ? p.precio_oferta : p.precio;
   return (
-    <GlowCard className="border-2 border-transparent bg-white shadow-[0_18px_44px_rgba(0,0,0,.12)] [background:linear-gradient(#fff,#fff)_padding-box,linear-gradient(120deg,#FFD100,#FF8200_55%,#EF3340)_border-box]">
+    <div className="glow-fuego bg-white shadow-[0_18px_44px_rgba(0,0,0,.12)]">
       <div className="relative aspect-[578/884] bg-white p-1">
         {p.imagen_principal_url && (
           <Image
@@ -48,28 +53,41 @@ function ProductCard({ p }: { p: Producto }) {
             <span className="text-xs font-medium text-tinta-tenue">{p.contenido_neto}</span>
           )}
         </div>
-        <h3 className="mt-2 font-title text-lg font-extrabold uppercase leading-tight text-tinta">
+        <h3 className="mt-2 line-clamp-2 min-h-[2.8rem] font-title text-lg font-extrabold uppercase leading-tight text-tinta">
           {p.nombre}
         </h3>
-        {p.descripcion_corta && (
-          <p className="mt-1.5 text-sm leading-relaxed text-tinta-suave">{p.descripcion_corta}</p>
-        )}
+        <p className="mt-1.5 line-clamp-3 min-h-[4.25rem] text-sm leading-relaxed text-tinta-suave">
+          {p.descripcion_corta}
+        </p>
         {precio > 0 && (
           <p className="mt-3 font-title text-xl font-extrabold text-tinta">{formatGs(precio)}</p>
         )}
-        <AddToCart
-          productoId={p.id}
-          nombre={p.nombre}
-          precio={precio}
-          imagen={p.imagen_principal_url}
-          slug={p.slug}
-        />
       </div>
-    </GlowCard>
+    </div>
   );
 }
 
 export function ProductosSection({ productos }: { productos: Producto[] }) {
+  // `productos` son los del build (render inmediato). Al montar, se refrescan en
+  // vivo desde la base, así los cambios del admin (agregar/eliminar) se ven al
+  // recargar la página, SIN necesidad de reconstruir el sitio.
+  const [lista, setLista] = useState<Producto[]>(productos);
+
+  useEffect(() => {
+    let activo = true;
+    createPublicClient()
+      .from("productos")
+      .select(CAMPOS)
+      .eq("activo", true)
+      .order("orden", { ascending: true })
+      .then(({ data, error }) => {
+        if (activo && !error && data) setLista(data as Producto[]);
+      });
+    return () => {
+      activo = false;
+    };
+  }, []);
+
   return (
     <section id="productos" className="px-6 py-24">
       <div className="mx-auto max-w-[1180px]">
@@ -83,7 +101,7 @@ export function ProductosSection({ productos }: { productos: Producto[] }) {
           </p>
         </Reveal>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {productos.map((p) => (
+          {lista.map((p) => (
             <Reveal key={p.id}>
               <ProductCard p={p} />
             </Reveal>
