@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Oculta el indicador flotante de Next.js Dev Tools (la "N") en desarrollo.
+  devIndicators: false,
   // Export estático (genera la carpeta `out/` para hosting compartido de Hostinger).
   output: "export",
   // Con export no hay optimización de imágenes en servidor: se sirven tal cual.
