@@ -20,18 +20,18 @@ export const TRABAJOS: Trabajo[] = [
       "Un espacio amplio y equipado con maquinaria de acero inoxidable, pensado para cuidar cada detalle de la elaboración.",
   },
   {
-    src: "/planta-corte.jpg",
-    alt: "Selección y corte de ingredientes frescos",
-    titulo: "Selección y corte",
-    texto:
-      "Seleccionamos y cortamos a mano ingredientes frescos, muchos de nuestra propia finca, para asegurar frescura y sabor.",
-  },
-  {
     src: "/planta-ingredientes.jpg",
     alt: "Ajíes y morrones naturales listos para procesar",
     titulo: "Ingredientes naturales",
     texto:
       "Ajíes, morrones y condimentos frescos y de excelente calidad, la base natural de cada una de nuestras salsas.",
+  },
+  {
+    src: "/planta-corte.jpg",
+    alt: "Selección y corte de ingredientes frescos",
+    titulo: "Selección y corte",
+    texto:
+      "Seleccionamos y cortamos a mano ingredientes frescos, muchos de nuestra propia finca, para asegurar frescura y sabor.",
   },
   {
     src: "/planta-maquinas.jpg",
@@ -55,6 +55,13 @@ export const TRABAJOS: Trabajo[] = [
       "Cuidamos la consistencia hasta el último detalle: color, aroma y sabor naturales, sin colorantes ni esencias.",
   },
   {
+    src: "/planta-envasadora.jpg",
+    alt: "Envasadora automática junto a la marmita",
+    titulo: "Envasadora automática",
+    texto:
+      "Tecnología que acompaña al trabajo artesanal para lograr un producto uniforme, seguro y de calidad constante.",
+  },
+  {
     src: "/planta-sellado.jpg",
     alt: "Envasado de la salsa en sachets",
     titulo: "Envasado en sachets",
@@ -67,13 +74,6 @@ export const TRABAJOS: Trabajo[] = [
     titulo: "Línea de producción",
     texto:
       "Miles de sachets y displays listos cada día, elaborados con el mismo cuidado del primer lote artesanal.",
-  },
-  {
-    src: "/planta-envasadora.jpg",
-    alt: "Envasadora automática junto a la marmita",
-    titulo: "Envasadora automática",
-    texto:
-      "Tecnología que acompaña al trabajo artesanal para lograr un producto uniforme, seguro y de calidad constante.",
   },
   {
     src: "/planta-armado-displays.jpg",
@@ -97,11 +97,11 @@ export const TRABAJOS: Trabajo[] = [
       "Empacamos y sellamos cada caja con cuidado, listas para llegar en perfecto estado a los puntos de venta.",
   },
   {
-    src: "/planta-deposito.jpg",
-    alt: "Depósito con cajas de productos Salsa Top",
-    titulo: "Depósito",
+    src: "/produccion-cajas.jpg",
+    alt: "Cajas de salsa picante de tomate con especias alineadas en la planta",
+    titulo: "Producción en Santaní",
     texto:
-      "Un depósito ordenado con stock de nuestra línea gourmet, listo para distribuir en todo el país.",
+      "Cada lote sale de nuestra planta en Santaní, Paraguay, con la calidad y el sabor de siempre en cada caja.",
   },
   {
     src: "/planta-pasillo.jpg",
@@ -111,11 +111,18 @@ export const TRABAJOS: Trabajo[] = [
       "Cada lote recorre un proceso ordenado y controlado, desde la elaboración hasta el despacho final.",
   },
   {
-    src: "/evento-degustacion.jpg",
-    alt: "Stand de Salsa Top con degustación de toda la línea de salsas",
-    titulo: "Degustaciones",
+    src: "/planta-deposito.jpg",
+    alt: "Depósito con cajas de productos Salsa Top",
+    titulo: "Depósito",
     texto:
-      "Llevamos la marca a eventos y puntos de venta con degustaciones de toda nuestra línea, para que cada persona descubra su salsa favorita.",
+      "Un depósito ordenado con stock de nuestra línea gourmet, listo para distribuir en todo el país.",
+  },
+  {
+    src: "/deposito-cajas.jpg",
+    alt: "Estantería con cajas de Salsa Top ordenadas por variedad",
+    titulo: "Stock por variedad",
+    texto:
+      "Cada variedad ordenada y lista para despachar a los puntos de venta de todo el país.",
   },
   {
     src: "/punto-de-venta.jpg",
@@ -125,11 +132,11 @@ export const TRABAJOS: Trabajo[] = [
       "Nuestros exhibidores en góndola presentan la línea completa, para que cada cliente encuentre su variedad a primera vista.",
   },
   {
-    src: "/deposito-cajas.jpg",
-    alt: "Estantería con cajas de Salsa Top ordenadas por variedad",
-    titulo: "Stock por variedad",
+    src: "/evento-degustacion.jpg",
+    alt: "Stand de Salsa Top con degustación de toda la línea de salsas",
+    titulo: "Degustaciones",
     texto:
-      "Cada variedad ordenada y lista para despachar a los puntos de venta de todo el país.",
+      "Llevamos la marca a eventos y puntos de venta con degustaciones de toda nuestra línea, para que cada persona descubra su salsa favorita.",
   },
   {
     src: "/maridaje-carnes.jpg",

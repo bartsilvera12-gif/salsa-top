@@ -1,6 +1,7 @@
 import { Hero } from "@/components/public/hero";
 import { AcercaSection } from "@/components/public/acerca-section";
 import { NosotrosSection } from "@/components/public/nosotros-section";
+import { DestacadosSection } from "@/components/public/destacados-section";
 import { ProductosSection } from "@/components/public/productos-section";
 import { BeneficiosSection } from "@/components/public/beneficios-section";
 import { ProcesoSection } from "@/components/public/proceso-section";
@@ -22,6 +23,7 @@ export default async function Home() {
   return (
     <main>
       <Hero hero={secciones.hero} />
+      <DestacadosSection productos={productos} />
       <NosotrosSection />
       <ProductosSection productos={productos} />
       <AcercaSection incluir={["Beneficios"]} />

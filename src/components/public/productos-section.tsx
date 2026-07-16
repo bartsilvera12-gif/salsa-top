@@ -8,7 +8,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { formatGs } from "@/lib/utils";
 import { Reveal } from "@/components/public/reveal";
 
-const CAMPOS =
+export const CAMPOS =
   "id, nombre, slug, descripcion_corta, contenido_neto, precio, precio_oferta, en_oferta, nivel_picante, imagen_principal_url, destacado";
 
 function Picante({ nivel }: { nivel: number }) {
@@ -29,7 +29,7 @@ function Picante({ nivel }: { nivel: number }) {
   );
 }
 
-function ProductCard({ p }: { p: Producto }) {
+export function ProductCard({ p }: { p: Producto }) {
   const precio = p.en_oferta && p.precio_oferta ? p.precio_oferta : p.precio;
   return (
     <div className="glow-fuego bg-white shadow-[0_18px_44px_rgba(0,0,0,.12)]">
