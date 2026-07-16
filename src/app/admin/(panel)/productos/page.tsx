@@ -4,11 +4,11 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Star } from "lucide-react";
 import { totalPaginas } from "@/lib/crud/paginacion";
 import { productosRepo } from "@/lib/repositorios/productos";
 import { categoriasRepo } from "@/lib/repositorios/categorias";
-import { alternarActivoCliente, eliminarProductoCliente } from "./acciones-cliente";
+import { alternarActivoCliente, alternarDestacadoCliente, eliminarProductoCliente } from "./acciones-cliente";
 import { useListado, Paginacion, BotonConfirmar, FilaCargando, FilaVacia } from "@/components/admin/lista-ui";
 import { Buscador, FiltroSelect, BarraFiltros } from "@/components/admin/filtros-ui";
 import { useToast } from "@/components/admin/toast";
@@ -50,6 +50,14 @@ function ProductosLista() {
       recargar();
     }
   }
+  async function onAlternarDestacado(id: string, destacado: boolean) {
+    const r = await alternarDestacadoCliente(id, destacado);
+    if ("error" in r) toast.error(r.error);
+    else {
+      toast.exito(destacado ? "Marcado como destacado" : "Quitado de destacados");
+      recargar();
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -88,12 +96,13 @@ function ProductosLista() {
                 <th className="px-4 py-3">Producto</th>
                 <th className="px-4 py-3">Categoría</th>
                 <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3">Destacado</th>
                 <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {cargando && <FilaCargando cols={4} />}
-              {!cargando && lista.rows.length === 0 && <FilaVacia cols={4} texto="No hay productos." />}
+              {cargando && <FilaCargando cols={5} />}
+              {!cargando && lista.rows.length === 0 && <FilaVacia cols={5} texto="No hay productos." />}
               {!cargando &&
                 lista.rows.map((p) => (
                   <tr key={p.id} className="border-b border-black/5 last:border-0">
@@ -114,6 +123,23 @@ function ProductosLista() {
                         : "rounded-full bg-black/10 px-2.5 py-1 text-xs font-semibold text-tinta-tenue"}>
                         {p.activo ? "Activo" : "Inactivo"}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => onAlternarDestacado(p.id, !p.destacado)}
+                        aria-pressed={p.destacado}
+                        title={p.destacado
+                          ? "Quitar de Destacados (aparece en la home)"
+                          : "Marcar como destacado (aparecerá en la home)"}
+                        className="rounded-lg p-2 transition-colors hover:bg-black/5"
+                      >
+                        <Star
+                          size={18}
+                          className={p.destacado ? "text-fuego-naranja" : "text-black/20"}
+                          fill={p.destacado ? "currentColor" : "none"}
+                        />
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1.5">

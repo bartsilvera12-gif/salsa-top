@@ -23,8 +23,8 @@ export default async function Home() {
   return (
     <main>
       <Hero hero={secciones.hero} />
-      <DestacadosSection productos={productos} />
       <NosotrosSection />
+      <DestacadosSection productos={productos} />
       <ProductosSection productos={productos} />
       <AcercaSection incluir={["Beneficios"]} />
       <BeneficiosSection beneficios={beneficios} />

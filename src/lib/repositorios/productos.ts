@@ -111,6 +111,7 @@ export const productosRepo = {
   crear: (payload: Record<string, unknown>) => crud.insertar(payload),
   actualizar: (id: string, payload: Record<string, unknown>) => crud.actualizar(id, payload),
   alternarActivo: (id: string, activo: boolean) => crud.alternar(id, "activo", activo),
+  alternarDestacado: (id: string, destacado: boolean) => crud.alternar(id, "destacado", destacado),
   eliminar: (id: string) => crud.eliminar(id),
   duplicar: (id: string) =>
     crud.duplicar(id, (fila) => {

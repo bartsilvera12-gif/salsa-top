@@ -66,6 +66,11 @@ export async function alternarActivoCliente(id: string, activo: boolean): Promis
   return r.ok ? { ok: true } : { error: r.error };
 }
 
+export async function alternarDestacadoCliente(id: string, destacado: boolean): Promise<Resultado> {
+  const r = await productosRepo.alternarDestacado(id, destacado);
+  return r.ok ? { ok: true } : { error: r.error };
+}
+
 export async function eliminarProductoCliente(id: string): Promise<Resultado> {
   const r = await productosRepo.eliminar(id);
   return r.ok ? { ok: true } : { error: r.error };
