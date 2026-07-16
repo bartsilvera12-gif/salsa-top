@@ -1,10 +1,16 @@
 # Despliegue en Hostinger (hosting compartido / Apache, sin Node.js)
 
-Esta guía corresponde a la rama **`static-export`**, que genera un sitio 100 %
-estático (`output: 'export'`) → carpeta **`out/`** para subir a `public_html`.
+## Cómo está organizado el proyecto
 
-> `main` sigue siendo la versión con Node (Vercel / VPS). Este flujo es solo
-> para el hosting **compartido** de Hostinger, que **no ejecuta Node.js**.
+- **El código fuente vive en `main`**, y es la versión principal del proyecto:
+  la app Next.js en `src/` y los assets en `public/`. Todo cambio se hace acá.
+- **`out/` es el resultado del build**, no una copia del proyecto. Se genera con
+  `npm run build`, **no reemplaza al código fuente** y no se commitea
+  (está en `.gitignore`). Se puede borrar y regenerar cuando sea.
+- **A Hostinger se sube el contenido de `out/`**, dentro de `public_html`.
+
+El sitio se compila 100 % estático (`output: 'export'`), porque el hosting
+compartido de Hostinger **no ejecuta Node.js**.
 
 ## 1. Generar el build estático
 
@@ -16,11 +22,21 @@ npm ci
 #   NEXT_PUBLIC_SUPABASE_URL=https://api.neura.com.py
 #   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 #   NEXT_PUBLIC_SITE_URL=https://tudominio.com
-#   NEXT_PUBLIC_WHATSAPP_NUMBER=595994208200
+#   NEXT_PUBLIC_WHATSAPP_NUMBER=595993605100
 npm run build          # genera out/ (+ postbuild copia el .htaccess)
 ```
 
-## 2. Subir a Hostinger
+## 2. Probar el build en local (antes de subir)
+
+```bash
+npx serve out -l 8095   # abrir http://localhost:8095
+```
+
+Sirve `out/` con un servidor web real, igual que lo hará Hostinger. Es la única
+forma válida de probarlo: abrir `out/index.html` con doble clic (`file://`) se ve
+roto, porque el sitio usa rutas absolutas (`/_next/…`) que necesitan un servidor.
+
+## 3. Subir a Hostinger
 
 - Subí **todo el contenido de `out/`** (no la carpeta, su contenido) dentro de
   **`public_html`**, incluido el **`.htaccess`** (activá "mostrar ocultos" en el
@@ -31,7 +47,7 @@ npm run build          # genera out/ (+ postbuild copia el .htaccess)
 > (`/_next/…`, `/logo-icono.png`). Si lo pusieras en un subdirectorio, habría que
 > configurar `basePath` + `assetPrefix` y reconstruir. En la raíz: sin cambios.
 
-## 3. Qué resuelve el `.htaccess` (incluido en `out/`)
+## 4. Qué resuelve el `.htaccess` (incluido en `out/`)
 
 - **Rutas directas**: Next genera `/ruta/index.html`; Apache las sirve al entrar
   a `/ruta/` (y agrega la barra final si falta). Rutas sin carpeta caen a `.html`.
@@ -41,20 +57,20 @@ npm run build          # genera out/ (+ postbuild copia el .htaccess)
 - **Caché** larga e inmutable para assets con hash; HTML sin caché agresiva.
 - **Compresión** gzip.
 
-## 4. Rutas dinámicas
+## 5. Rutas dinámicas
 
 Como el export no admite parámetros desconocidos (`[id]`, `[numero]`), esas
 pantallas se sirven como **HTML base + render en el navegador** leyendo el
 parámetro de la query (`?id=…`). Ej.: `/admin/productos/editar/?id=abc` sirve el
 HTML de `editar/` y el navegador carga el producto. **Funciona con acceso directo.**
 
-## 5. Requisitos del lado de Supabase (una vez)
+## 6. Requisitos del lado de Supabase (una vez)
 
 1. **Exponer el schema `saltatop`** en PostgREST (reiniciar el servicio `rest`).
 2. Desplegar la **Edge Function `crear-usuario`** (para alta de admins sin
    exponer la service_role): `supabase functions deploy crear-usuario`.
 
-## 6. Checklist de verificación (Apache, sin Node)
+## 7. Checklist de verificación (Apache, sin Node)
 
 - [ ] `https://tudominio.com/` carga (home pública).
 - [ ] Recarga directa de `/carrito/`, `/checkout/`, `/admin/login/` (F5) → OK.
