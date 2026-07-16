@@ -36,3 +36,5 @@ yarn-error.log*
 /supabase/.branches
 /supabase/.temp
 /dist/
+/salsa-top-2026/
+/salsa-top-hostinger.zip

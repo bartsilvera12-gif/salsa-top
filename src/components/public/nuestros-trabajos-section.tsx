@@ -110,6 +110,13 @@ export const TRABAJOS: Trabajo[] = [
     texto:
       "Cada lote recorre un proceso ordenado y controlado, desde la elaboración hasta el despacho final.",
   },
+  {
+    src: "/evento-degustacion.jpg",
+    alt: "Stand de Salsa Top con degustación de toda la línea de salsas",
+    titulo: "Degustaciones",
+    texto:
+      "Llevamos la marca a eventos y puntos de venta con degustaciones de toda nuestra línea, para que cada persona descubra su salsa favorita.",
+  },
 ];
 
 /** Galería de la planta: imágenes con texto, en recuadros con el efecto de fuego. */

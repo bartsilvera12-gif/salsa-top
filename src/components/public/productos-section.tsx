@@ -12,9 +12,11 @@ const CAMPOS =
   "id, nombre, slug, descripcion_corta, contenido_neto, precio, precio_oferta, en_oferta, nivel_picante, imagen_principal_url, destacado";
 
 function Picante({ nivel }: { nivel: number }) {
-  if (!nivel) return null;
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`Nivel de picante ${nivel} de 5`}>
+    <span
+      className="inline-flex items-center gap-0.5"
+      aria-label={nivel > 0 ? `Nivel de picante ${nivel} de 5` : "Sin picante"}
+    >
       {Array.from({ length: 5 }).map((_, i) => (
         <Flame
           key={i}
@@ -44,11 +46,7 @@ function ProductCard({ p }: { p: Producto }) {
       </div>
       <div className="px-5 pb-6 pt-4">
         <div className="flex items-center justify-between gap-2">
-          {p.nivel_picante > 0 ? (
-            <Picante nivel={p.nivel_picante} />
-          ) : (
-            <span className="text-xs font-semibold uppercase tracking-wider text-acento">Gourmet</span>
-          )}
+          <Picante nivel={p.nivel_picante} />
           {p.contenido_neto && (
             <span className="text-xs font-medium text-tinta-tenue">{p.contenido_neto}</span>
           )}

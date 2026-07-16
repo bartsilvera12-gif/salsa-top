@@ -12,7 +12,7 @@ export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://salsatop.com.py";
 
 export const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "595994208200";
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "595993605100";
 
 /** Schema de PostgREST donde viven todas las tablas del proyecto. */
 export const DB_SCHEMA = "saltatop" as const;

@@ -84,19 +84,22 @@
 
   /* ---------------------------------------------------------------------------
      Spotlight-card (adaptación del componente): el borde del recuadro brilla en
-     la zona más cercana al cursor y lo sigue por toda la página. El tono cambia
-     con la posición horizontal del cursor (--xp) → distintos colores. `::before`
-     es el resplandor de color; `::after` es el núcleo blanco brillante. Ambos se
-     recortan al anillo del borde y usan `background-attachment: fixed` para
-     alinearse al cursor real. Se aplica a `.recuadro`, `.glow-fuego` y header.
+     la zona más cercana al cursor y lo sigue por toda la página. Se muestra un
+     solo tono a la vez, que cambia con la posición horizontal del cursor (--xp)
+     dentro de la paleta de marca: rojo → naranja → amarillo. `::before` es el
+     resplandor de color; `::after` es el núcleo blanco brillante. Ambos se
+     recortan al anillo del borde y se ubican con las coordenadas locales del
+     cursor (--lx/--ly). Se aplica a `.recuadro`, `.glow-fuego` y header.
      --------------------------------------------------------------------------- */
   .recuadro,
   .glow-fuego,
   .borde-fuego,
   .borde-fuego-blanco {
     position: relative;
-    /* Tono dentro de la paleta de marca: rojo (3) → naranja → amarillo (49). */
-    --glow-hue: calc(3 + var(--xp, 0) * 46);
+    /* Un tono a la vez, dentro de la paleta de marca, según la posición
+       horizontal del cursor: rojo (356) → naranja (31) → amarillo (49).
+       El tono se normaliza módulo 360, por eso el rango va de 356 a 409. */
+    --glow-hue: calc(356 + var(--xp, 0) * 53);
     /* Rango medio: el resplandor ilumina solo la zona alrededor del cursor,
        sin cubrir todo el recuadro. */
     --glow-size: 340px;
@@ -138,11 +141,11 @@
     background-image: radial-gradient(
       var(--glow-size) var(--glow-size) at
         calc(var(--lx, -9999) * 1px) calc(var(--ly, -9999) * 1px),
-      hsl(var(--glow-hue) 100% 55%) 0%,
+      hsl(var(--glow-hue) 100% 58%) 0%,
       hsl(var(--glow-hue) 100% 50%) 32%,
       transparent 78%
     );
-    filter: brightness(2.4) saturate(1.4);
+    filter: brightness(1.35) saturate(1.3);
   }
   /* Núcleo blanco brillante en el punto del cursor. */
   .recuadro::after,

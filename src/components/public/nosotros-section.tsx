@@ -3,7 +3,7 @@ import { Reveal } from "@/components/public/reveal";
 
 const STATS = [
   { valor: "100%", label: "Artesanal" },
-  { valor: "0", label: "Colorantes artificiales" },
+  { valor: "0%", label: "Esencia y 0% colorantes artificiales" },
   { valor: "Finca", label: "Ingredientes propios" },
 ];
 

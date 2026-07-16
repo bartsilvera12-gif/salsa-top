@@ -5,7 +5,6 @@ import { ProductosSection } from "@/components/public/productos-section";
 import { BeneficiosSection } from "@/components/public/beneficios-section";
 import { ProcesoSection } from "@/components/public/proceso-section";
 import { NuestrosTrabajosSection } from "@/components/public/nuestros-trabajos-section";
-import { PropuestaSection } from "@/components/public/propuesta-section";
 import { ContactoSection } from "@/components/public/contacto-section";
 import { getConfiguracion, getSecciones, getProductos, getBeneficios } from "@/lib/datos";
 
@@ -24,7 +23,6 @@ export default async function Home() {
     <main>
       <Hero hero={secciones.hero} />
       <NosotrosSection />
-      <PropuestaSection propuesta={secciones.propuesta} />
       <ProductosSection productos={productos} />
       <AcercaSection incluir={["Beneficios"]} />
       <BeneficiosSection beneficios={beneficios} />

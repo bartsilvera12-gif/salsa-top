@@ -24,7 +24,6 @@ const BLOQUES: Bloque[] = [
     titulo: "Competencia de la marca",
     parrafos: [
       "Nuestra marca no posee un competidor directo, ya que desarrolla productos elaborados con ingredientes y combinaciones únicas que actualmente no tienen un equivalente en el mercado. En otras palabras, no existe una marca que ofrezca un portafolio de productos similares al nuestro.",
-      "Sin embargo, identificamos como competencia indirecta a marcas reconocidas que participan en la categoría de salsas y condimentos premium, con estándares de calidad comparables, entre las que se destacan Heinz, Tabasco y Kühne. Si bien sus productos difieren en formulación, sabor y propuesta de valor, compiten por el mismo espacio de consumo y por la preferencia del consumidor.",
     ],
   },
 ];

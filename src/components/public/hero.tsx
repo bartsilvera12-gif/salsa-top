@@ -41,11 +41,8 @@ export function Hero({ hero }: { hero: Seccion }) {
         )}
 
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-          <a href={hero.enlace_boton ?? "#productos"} className="btn-fuego">
+          <a href="#productos" className="btn-fuego">
             {hero.texto_boton ?? "Ver productos"}
-          </a>
-          <a href="#distribuidores" className="btn-contorno">
-            Quiero distribuir
           </a>
         </div>
       </div>

@@ -54,7 +54,7 @@ const CONFIG_FALLBACK: Configuracion = {
   eslogan: "No es solo una salsa. Es una experiencia gourmet.",
   descripcion_corta: "Salsas artesanales gourmet del Paraguay.",
   whatsapp: WHATSAPP_NUMBER,
-  telefono: "0994 208 200",
+  telefono: "0993 605100",
   email: null,
   instagram_url: "https://www.instagram.com/salsa.top.py",
   facebook_url: "https://www.facebook.com/share/1BYp9aQXAG/",
@@ -135,7 +135,10 @@ export async function getConfiguracion(): Promise<Configuracion> {
       .eq("activo", true)
       .limit(1)
       .maybeSingle();
-    return (data as Configuracion | null) ?? CONFIG_FALLBACK;
+    const base = (data as Configuracion | null) ?? CONFIG_FALLBACK;
+    // Número de contacto oficial fijado en código: garantiza que el sitio
+    // estático use siempre el correcto, sin depender del valor de la base.
+    return { ...base, whatsapp: WHATSAPP_NUMBER, telefono: "0993 605100" };
   } catch {
     return CONFIG_FALLBACK;
   }
