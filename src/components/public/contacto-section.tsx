@@ -5,13 +5,9 @@ import { Reveal } from "@/components/public/reveal";
 
 /** Contacto y distribución (minorista/mayorista) unificados en un solo recuadro. */
 export function ContactoSection({ config, contacto }: { config: Configuracion; contacto: Seccion }) {
-  const urlMinorista = waLink(
+  const urlConsulta = waLink(
     config.whatsapp,
-    "Hola Salsa Top, soy minorista y quiero vender sus productos en mi local.",
-  );
-  const urlMayorista = waLink(
-    config.whatsapp,
-    "Hola Salsa Top, soy mayorista y quiero distribuir sus productos.",
+    "Hola Salsa Top, quiero hacer una consulta.",
   );
 
   return (
@@ -33,20 +29,9 @@ export function ContactoSection({ config, contacto }: { config: Configuracion; c
               </p>
             </div>
 
-            {/* Distribución: elegí tu caso */}
-            <div className="flex w-full flex-col items-center gap-3">
-              <p className="text-sm font-semibold uppercase tracking-wide text-tinta-tenue">
-                ¿Querés vender Salsa Top?
-              </p>
-              <div className="flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
-                <a href={urlMinorista} target="_blank" rel="noopener" className="btn-fuego">
-                  <WhatsappIcon /> Soy minorista
-                </a>
-                <a href={urlMayorista} target="_blank" rel="noopener" className="btn-fuego">
-                  <WhatsappIcon /> Soy mayorista
-                </a>
-              </div>
-            </div>
+            <a href={urlConsulta} target="_blank" rel="noopener" className="btn-fuego">
+              <WhatsappIcon /> Consultar ahora
+            </a>
           </div>
         </Reveal>
       </div>

@@ -1,6 +1,7 @@
 import { ChiliBackground } from "@/components/public/chili-background";
 import { SiteHeader } from "@/components/public/site-header";
 import { SiteFooter } from "@/components/public/site-footer";
+import { WhatsappFlotante } from "@/components/public/whatsapp-flotante";
 import { getConfiguracion } from "@/lib/datos";
 import { waLink } from "@/lib/whatsapp";
 
@@ -18,6 +19,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <SiteHeader whatsappUrl={wa} />
       <div className="min-h-screen">{children}</div>
       <SiteFooter config={config} />
+      <WhatsappFlotante url={wa} />
     </>
   );
 }

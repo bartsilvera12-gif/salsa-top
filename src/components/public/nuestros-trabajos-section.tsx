@@ -117,6 +117,34 @@ export const TRABAJOS: Trabajo[] = [
     texto:
       "Llevamos la marca a eventos y puntos de venta con degustaciones de toda nuestra línea, para que cada persona descubra su salsa favorita.",
   },
+  {
+    src: "/punto-de-venta.jpg",
+    alt: "Exhibidor de Salsa Top en la góndola de un punto de venta",
+    titulo: "En el punto de venta",
+    texto:
+      "Nuestros exhibidores en góndola presentan la línea completa, para que cada cliente encuentre su variedad a primera vista.",
+  },
+  {
+    src: "/deposito-cajas.jpg",
+    alt: "Estantería con cajas de Salsa Top ordenadas por variedad",
+    titulo: "Stock por variedad",
+    texto:
+      "Cada variedad ordenada y lista para despachar a los puntos de venta de todo el país.",
+  },
+  {
+    src: "/maridaje-carnes.jpg",
+    alt: "Corte de carne a la parrilla con salsa picante de morrones con nueces",
+    titulo: "Ideal para carnes",
+    texto:
+      "Nuestra salsa picante de morrones con nueces realza el sabor de un buen corte a la parrilla.",
+  },
+  {
+    src: "/maridaje-quesos.jpg",
+    alt: "Tabla de quesos acompañada con salsa picante de piña con pimienta",
+    titulo: "Perfecta con quesos",
+    texto:
+      "La salsa picante de piña con pimienta convierte una tabla de quesos en una experiencia gourmet.",
+  },
 ];
 
 /** Galería de la planta: imágenes con texto, en recuadros con el efecto de fuego. */

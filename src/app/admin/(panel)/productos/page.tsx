@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { formatGs } from "@/lib/utils";
 import { totalPaginas } from "@/lib/crud/paginacion";
 import { productosRepo } from "@/lib/repositorios/productos";
 import { categoriasRepo } from "@/lib/repositorios/categorias";
@@ -88,15 +87,13 @@ function ProductosLista() {
               <tr>
                 <th className="px-4 py-3">Producto</th>
                 <th className="px-4 py-3">Categoría</th>
-                <th className="px-4 py-3">Precio</th>
-                <th className="px-4 py-3">Stock</th>
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {cargando && <FilaCargando cols={6} />}
-              {!cargando && lista.rows.length === 0 && <FilaVacia cols={6} texto="No hay productos." />}
+              {cargando && <FilaCargando cols={4} />}
+              {!cargando && lista.rows.length === 0 && <FilaVacia cols={4} texto="No hay productos." />}
               {!cargando &&
                 lista.rows.map((p) => (
                   <tr key={p.id} className="border-b border-black/5 last:border-0">
@@ -111,8 +108,6 @@ function ProductosLista() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-tinta-suave">{p.categoria ?? "—"}</td>
-                    <td className="px-4 py-3 text-tinta-suave">{p.precio > 0 ? formatGs(p.precio) : "—"}</td>
-                    <td className="px-4 py-3 text-tinta-suave">{p.stock}</td>
                     <td className="px-4 py-3">
                       <span className={p.activo
                         ? "rounded-full bg-petroleo/10 px-2.5 py-1 text-xs font-semibold text-petroleo"
