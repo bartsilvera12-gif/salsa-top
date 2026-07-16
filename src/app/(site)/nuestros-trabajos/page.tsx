@@ -14,8 +14,8 @@ export default function NuestrosTrabajosPage() {
   return (
     <section className="px-6 py-20">
       <div className="mx-auto max-w-[1180px]">
-        <div className="mb-8">
-          <Link href="/" className="btn-contorno">
+        <div className="mb-8 flex justify-end">
+          <Link href="/" className="btn-fuego">
             <ArrowLeft size={18} /> Volver al inicio
           </Link>
         </div>
@@ -37,7 +37,7 @@ export default function NuestrosTrabajosPage() {
           ))}
         </div>
         <div className="mt-12 text-center">
-          <Link href="/" className="btn-contorno">
+          <Link href="/" className="btn-fuego">
             Volver al inicio
           </Link>
         </div>

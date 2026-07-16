@@ -3,7 +3,8 @@ import { Reveal } from "@/components/public/reveal";
 
 const STATS = [
   { valor: "100%", label: "Artesanal" },
-  { valor: "0%", label: "Esencia y 0% colorantes artificiales" },
+  { valor: "0%", label: "Esencia" },
+  { valor: "0%", label: "Colorantes artificiales" },
   { valor: "Finca", label: "Ingredientes propios" },
 ];
 
@@ -39,7 +40,7 @@ export function NosotrosSection() {
                 <p key={i}>{parrafo}</p>
               ))}
             </div>
-            <div className="mt-8 grid grid-cols-3 gap-4 border-t border-black/10 pt-6">
+            <div className="mt-8 grid grid-cols-2 gap-4 border-t border-black/10 pt-6 sm:grid-cols-4">
               {STATS.map((s) => (
                 <div key={s.label}>
                   <p className="font-title text-2xl font-extrabold text-acento">{s.valor}</p>
