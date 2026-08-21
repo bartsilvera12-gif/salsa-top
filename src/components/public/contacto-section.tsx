@@ -1,3 +1,4 @@
+import { MapPin } from "lucide-react";
 import type { Configuracion, Seccion } from "@/lib/datos";
 import { waLink } from "@/lib/whatsapp";
 import { WhatsappIcon } from "@/components/public/whatsapp-icon";
@@ -32,6 +33,19 @@ export function ContactoSection({ config, contacto }: { config: Configuracion; c
             <a href={urlConsulta} target="_blank" rel="noopener" className="btn-fuego">
               <WhatsappIcon /> Consultar ahora
             </a>
+
+            <div className="flex items-start gap-3 border-t border-black/10 pt-6 text-left">
+              <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-acento" aria-hidden />
+              <address className="not-italic text-sm leading-relaxed text-tinta-suave">
+                <span className="font-semibold text-tinta">LUMA COMEX S.A.</span>
+                <br />
+                Ruta PY03 · Km 156
+                <br />
+                San Estanislao, San Pedro
+                <br />
+                Paraguay
+              </address>
+            </div>
           </div>
         </Reveal>
       </div>

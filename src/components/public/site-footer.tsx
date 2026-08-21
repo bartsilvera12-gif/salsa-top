@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MapPin } from "lucide-react";
 import type { Configuracion } from "@/lib/datos";
 import { SocialIcons } from "@/components/public/social-icons";
 import { WhatsappIcon } from "@/components/public/whatsapp-icon";
@@ -28,6 +29,14 @@ export function SiteFooter({ config }: { config: Configuracion }) {
           <p className="text-xs text-tinta-suave">
             {config.descripcion_corta ?? "Salsas artesanales gourmet del Paraguay."}
           </p>
+          <address className="mt-1 flex items-start gap-1.5 not-italic text-xs leading-relaxed text-tinta-tenue">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-acento" aria-hidden />
+            <span>
+              LUMA COMEX S.A. · Ruta PY03 Km 156
+              <br />
+              San Estanislao, San Pedro, Paraguay
+            </span>
+          </address>
         </div>
 
         {/* Navegación */}
